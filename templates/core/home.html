@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Avto-Декор{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative h-[600px] flex items-center justify-center overflow-hidden">
+    <div 
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style="background-image: url('https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjcyNjQ0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')"
+    ></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80"></div>
+    
+    <div class="container mx-auto px-4 relative z-10 text-center">
+        <h1 class="text-5xl md:text-7xl mb-6 text-white">
+            Тюнинг-ателье <br />
+            <span class="text-red-700">Avto-Декор</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mb-4 max-w-3xl mx-auto font-medium">
+            Тюнинг. Стиль. Индивидуальность.
+        </p>
+        <p class="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto italic">
+            Ветер, визг колёс и мощный бас колонок, диски 20 дюймов, кожаный салон. 
+            На Avto-Декор не встретишь ты болонок: тюнинг, стиль и мощь – готовься взять разгон!
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div class="flex items-center gap-2 text-gray-300">
+                <svg class="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>Петрозаводск, ул. Гвардейская 20</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-300">
+                <svg class="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+                <span>8 (8142) 28-23-01</span>
+            </div>
+        </div>
+        <a
+            href="{% url 'services:list' %}"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-8 py-4 rounded-lg text-lg"
+        >
+            Наши Услуги
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+</section>
+
+<!-- Services Preview -->
+<section class="container mx-auto px-4 py-20">
+    <h2 class="text-4xl text-center mb-12 text-white">
+        Наши <span class="text-red-700">Услуги</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for service in services %}
+        <a href="{% url 'services:detail' slug=service.slug %}" class="group bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg overflow-hidden border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block">
+            <div class="h-48 overflow-hidden">
+                {% if service.image %}
+                <img
+                    src="{{ service.image.url }}"
+                    alt="{{ service.title }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                {% else %}
+                <img
+                    src="https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjcyNjQ0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                    alt="{{ service.title }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                {% endif %}
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl mb-3 text-white">{{ service.title }}</h3>
+                <p class="text-gray-400">{{ service.short_description|default:service.description|truncatewords:15 }}</p>
+            </div>
+        </a>
+        {% empty %}
+        <div class="col-span-full text-center text-gray-400">
+            <p>Услуги будут добавлены в ближайшее время</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-12">
+        <a
+            href="{% url 'services:list' %}"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
+        >
+            Все Услуги
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+</section>
+
+<!-- About Company -->
+<section class="container mx-auto px-4 py-20">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl text-center mb-6 text-white">
+            О <span class="text-red-700">компании</span>
+        </h2>
+        <p class="text-xl text-center text-gray-300 mb-12 max-w-3xl mx-auto">
+            Более 10 лет студия Avto-Декор создаёт автомобильные интерьеры, где сочетаются стиль, комфорт и характер.
+        </p>
+        <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 md:p-12 border border-red-900/20">
+            <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                Наши мастера работают с кожей Nappa, алькантарой и другими премиум-материалами, воплощая любые идеи заказчиков — от классики до эксклюзива. 
+                Мы были первыми и остаемся лучшими в тюнинге салона автомобиля в Петрозаводске.
+            </p>
+            <p class="text-gray-300 text-lg leading-relaxed">
+                Сотни реализованных проектов, высококвалифицированные специалисты и непревзойденное качество работы — 
+                вот что делает нас выбором тех, кому важно получать высококачественный, полезный сервис.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="bg-black/40 py-20">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl text-center mb-12 text-white">
+            Почему выбирают <span class="text-red-700">нас</span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Опыт</h3>
+                <p class="text-gray-400">Более 10 лет успешной работы и сотни реализованных проектов</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Технологии</h3>
+                <p class="text-gray-400">Проверенные временем процессы и современные решения для салонов премиум-класса</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Качество</h3>
+                <p class="text-gray-400">Каждый шов, каждая деталь под контролем мастера. Контроль качества на всех этапах</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Ответственность</h3>
+                <p class="text-gray-400">Гарантируем сохранность вашего автомобиля и идеальный результат работы</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Знания</h3>
+                <p class="text-gray-400">Благодаря многолетнему опыту, мы знаем всё об интерьерах машин</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-6 border border-red-900/20 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700/20 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl mb-2 text-white">Безопасность</h3>
+                <p class="text-gray-400">Ваш автомобиль будет находиться в комфортных условиях с хорошей охраной</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Works Preview -->
+{% if works %}
+<section class="container mx-auto px-4 py-20">
+    <h2 class="text-4xl text-center mb-12 text-white">
+        Наши <span class="text-red-700">Работы</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto" id="works-carousel">
+        <!-- Первые 3 работы отображаются сразу -->
+        {% for work in works|slice:":3" %}
+        <div class="work-item group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 aspect-square opacity-100">
+            <img
+                src="{{ work.image.url }}"
+                alt="{{ work.category.name }} - работа {{ forloop.counter }}"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                data-work-index="{{ forloop.counter0 }}"
+            />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-12">
+        <a
+            href="{% url 'works:list' %}"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
+        >
+            Все Работы
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const worksData = [
+        {% for work in works %}
+        {
+            image: "{{ work.image.url }}",
+            category: "{{ work.category.name }}",
+            index: {{ forloop.counter0 }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    if (worksData.length < 3) return; // Нужно минимум 3 работы
+    
+    const carousel = document.getElementById('works-carousel');
+    const workItems = carousel.querySelectorAll('.work-item');
+    let currentIndices = [0, 1, 2]; // Индексы текущих отображаемых работ
+    let usedIndices = new Set([0, 1, 2]); // Индексы, которые уже использовались
+    let rotationIndex = 0; // Индекс позиции для ротации (0=слева, 1=центр, 2=справа)
+    
+    function getNextAvailableIndex() {
+        // Находим следующий доступный индекс, который еще не использовался
+        for (let i = 0; i < worksData.length; i++) {
+            if (!usedIndices.has(i)) {
+                return i;
+            }
+        }
+        // Если все использованы, сбрасываем и начинаем заново
+        usedIndices.clear();
+        usedIndices.add(currentIndices[0]);
+        usedIndices.add(currentIndices[1]);
+        usedIndices.add(currentIndices[2]);
+        // Ищем индекс, который не в текущих
+        for (let i = 0; i < worksData.length; i++) {
+            if (!usedIndices.has(i)) {
+                return i;
+            }
+        }
+        // Если все равно не нашли, возвращаем следующий по кругу
+        return (Math.max(...currentIndices) + 1) % worksData.length;
+    }
+    
+    function rotateWork() {
+        const itemToChange = workItems[rotationIndex];
+        const img = itemToChange.querySelector('img');
+        
+        // Получаем новый индекс
+        const newIndex = getNextAvailableIndex();
+        
+        // Удаляем старый индекс из использованных (если он не в других позициях)
+        const oldIndex = currentIndices[rotationIndex];
+        if (!currentIndices.includes(oldIndex)) {
+            usedIndices.delete(oldIndex);
+        }
+        
+        // Обновляем текущий индекс
+        currentIndices[rotationIndex] = newIndex;
+        usedIndices.add(newIndex);
+        
+        // Плавное исчезновение
+        itemToChange.style.opacity = '0';
+        itemToChange.style.transition = 'opacity 0.5s ease-in-out';
+        
+        setTimeout(() => {
+            // Меняем изображение
+            img.src = worksData[newIndex].image;
+            img.alt = worksData[newIndex].category + ' - работа ' + (newIndex + 1);
+            img.setAttribute('data-work-index', newIndex);
+            
+            // Плавное появление
+            itemToChange.style.opacity = '1';
+        }, 500);
+        
+        // Переходим к следующей позиции (слева направо, затем снова слева)
+        rotationIndex = (rotationIndex + 1) % 3;
+    }
+    
+    // Запускаем ротацию каждые 4 секунды
+    setInterval(rotateWork, 4000);
+});
+</script>
+{% endif %}
+
+<!-- Materials Section -->
+<section class="container mx-auto px-4 py-20">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl text-center mb-6 text-white">
+            Премиум <span class="text-red-700">материалы</span>
+        </h2>
+        <p class="text-xl text-center text-gray-300 mb-12 max-w-3xl mx-auto">
+            Работаем с лучшими материалами для создания неповторимого интерьера
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
+                <h3 class="text-2xl text-white mb-4">Кожа Nappa</h3>
+                <p class="text-gray-300 leading-relaxed">
+                    Тончайшая натуральная кожа подарит особенный комфорт. Сидения, обтянутые ею, манят своими «объятиями». 
+                    Терпкий, изысканный аромат кожи пьянит, усиливает ощущения шика и комфорта.
+                </p>
+            </div>
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
+                <h3 class="text-2xl text-white mb-4">Алькантара</h3>
+                <p class="text-gray-300 leading-relaxed">
+                    Великолепная ткань не уступает по комфортности коже. Разнообразная палитра материала позволит создать 
+                    невероятной красоты дизайн-проект, особенный, неповторимый.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="container mx-auto px-4 py-20">
+    <div class="bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
+        <h2 class="text-4xl mb-4 text-white">Готовы преобразить свой автомобиль?</h2>
+        <p class="text-xl text-gray-300 mb-2">
+            Каждый проект — это история о вкусе и внимании к деталям.
+        </p>
+        <p class="text-lg text-gray-400 mb-8">
+            Вы задумываете, мы реализуем. Avto-Декор — когда важно качество в каждой детали.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+                href="{% url 'contacts:contacts' %}"
+                class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-8 py-4 rounded-lg text-lg"
+            >
+                Связаться с нами
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+            <a
+                href="tel:88142282301"
+                class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 transition-colors px-8 py-4 rounded-lg text-lg"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+                8 (8142) 28-23-01
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

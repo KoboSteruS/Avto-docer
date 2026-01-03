@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Услуги - Avto-Декор{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-20">
+    <h1 class="text-5xl text-center mb-6 text-white">
+        Наши <span class="text-red-700">Услуги</span>
+    </h1>
+    <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">
+        Мы предлагаем полный спектр услуг по тюнингу и улучшению автомобильного интерьера
+    </p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {% for service in services %}
+        <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20 hover:border-red-700/50 transition-all">
+            <div class="flex items-start gap-6">
+                <div class="flex-shrink-0">
+                    <div class="w-16 h-16 bg-red-700/20 rounded-lg flex items-center justify-center">
+                        {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-12 h-12 object-cover rounded">
+                        {% else %}
+                        <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex-1">
+                    <h2 class="text-2xl mb-3 text-white">
+                        <a href="/uslugi/{{ service.slug }}/" class="hover:text-red-700 transition-colors">
+                            {{ service.title }}
+                        </a>
+                    </h2>
+                    <p class="text-gray-400 mb-6">{{ service.short_description|default:service.description }}</p>
+                    
+                    {% if service.features %}
+                    <h3 class="text-white mb-3">Включает:</h3>
+                    <ul class="space-y-2">
+                        {% for feature in service.get_features_list %}
+                        <li class="flex items-center gap-2 text-gray-300">
+                            <div class="w-1.5 h-1.5 bg-red-700 rounded-full flex-shrink-0"></div>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center text-gray-400 py-20">
+            <p class="text-xl">Услуги будут добавлены в ближайшее время</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
+        <h2 class="text-3xl mb-4 text-white">Нужна консультация?</h2>
+        <p class="text-gray-300 mb-6">
+            Свяжитесь с нами для подробной консультации и расчета стоимости услуг
+        </p>
+        <a
+            href="tel:88142282380"
+            class="inline-block bg-red-700 hover:bg-red-800 transition-colors px-8 py-4 rounded-lg text-lg"
+        >
+            8(8142) 28-23-80
+        </a>
+    </div>
+</div>
+{% endblock %}
