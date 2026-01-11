@@ -27,25 +27,42 @@
                     <img 
                         src="{% static 'img/Logo.png' %}" 
                         alt="Avto-Декор" 
-                        class="h-16 w-auto"
+                        class="h-12 md:h-16 w-auto"
                     />
                 </a>
 
-                <!-- Contact -->
-                <a 
-                    href="tel:88142282380" 
-                    class="flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                    </svg>
-                    <span>8(8142) 28-23-80</span>
-                </a>
+                <!-- Desktop Contact & Mobile Burger -->
+                <div class="flex items-center gap-4">
+                    <!-- Desktop Contact -->
+                    <a 
+                        href="tel:88142282380" 
+                        class="hidden md:flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        <span>8(8142) 28-23-80</span>
+                    </a>
+
+                    <!-- Mobile Burger Menu Button -->
+                    <button 
+                        id="mobile-menu-button"
+                        class="md:hidden flex items-center justify-center w-10 h-10 text-white hover:bg-red-900/30 rounded-lg transition-colors"
+                        aria-label="Меню"
+                    >
+                        <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="border-t border-red-900/20">
-                <ul class="flex flex-wrap gap-2 md:gap-0">
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:block border-t border-red-900/20">
+                <ul class="flex gap-0">
                     {% url 'core:home' as home_url %}
                     <li class="flex-1">
                         <a
@@ -102,6 +119,88 @@
                     </li>
                 </ul>
             </nav>
+
+            <!-- Mobile Navigation (Burger Menu) -->
+            <nav 
+                id="mobile-menu"
+                class="md:hidden border-t border-red-900/20 hidden overflow-hidden transition-all duration-300 ease-in-out"
+            >
+                <ul class="flex flex-col">
+                    {% url 'core:home' as home_url %}
+                    <li>
+                        <a
+                            href="{{ home_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path == home_url %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            ГЛАВНАЯ
+                        </a>
+                    </li>
+                    {% url 'services:list' as services_url %}
+                    <li>
+                        <a
+                            href="{{ services_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path|slice:':7' == '/uslugi' %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            УСЛУГИ
+                        </a>
+                    </li>
+                    {% url 'works:list' as works_url %}
+                    <li>
+                        <a
+                            href="{{ works_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path == works_url %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            НАШИ РАБОТЫ
+                        </a>
+                    </li>
+                    {% url 'reviews:list' as reviews_url %}
+                    <li>
+                        <a
+                            href="{{ reviews_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path == reviews_url %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            ОТЗЫВЫ
+                        </a>
+                    </li>
+                    {% url 'core:about' as about_url %}
+                    <li>
+                        <a
+                            href="{{ about_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path == about_url %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            О СТУДИИ
+                        </a>
+                    </li>
+                    {% url 'contacts:contacts' as contacts_url %}
+                    <li>
+                        <a
+                            href="{{ contacts_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path == contacts_url %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            КОНТАКТЫ
+                        </a>
+                    </li>
+                    <!-- Mobile Contact -->
+                    <li class="border-t border-red-900/20">
+                        <a
+                            href="tel:88142282380"
+                            class="flex items-center justify-center gap-2 px-4 py-3 bg-red-700 hover:bg-red-800 transition-colors text-white"
+                            onclick="closeMobileMenu()"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>8(8142) 28-23-80</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -142,6 +241,55 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
+    
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        function toggleMobileMenu() {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+        
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', toggleMobileMenu);
+        }
+        
+        // Закрываем меню при клике вне его
+        document.addEventListener('click', function(event) {
+            const isClickInsideMenu = mobileMenu.contains(event.target);
+            const isClickOnButton = mobileMenuButton && mobileMenuButton.contains(event.target);
+            
+            if (!isClickInsideMenu && !isClickOnButton && !mobileMenu.classList.contains('hidden')) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Закрываем меню при изменении размера окна (если перешли на desktop)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                closeMobileMenu();
+            }
+        });
+    </script>
 </body>
 </html>
 

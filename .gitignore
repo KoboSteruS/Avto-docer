@@ -50,3 +50,6 @@ Thumbs.db
 .env
 .env.local
 
+# Data files
+/data
+data/
