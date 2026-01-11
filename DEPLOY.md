@@ -1,7 +1,7 @@
 # Инструкция по деплою на сервер
 
 ## Сервер: 195.133.49.72
-## Путь: /root
+## Путь: /root/Avto-docer
 
 ---
 
@@ -65,12 +65,12 @@ apt install -y git
 cd /root
 
 # Клонируем репозиторий
-git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ> avto-decor
+git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ> Avto-docer
 
 # Или если репозиторий приватный, используйте SSH:
-# git clone git@github.com:username/avto-decor.git avto-decor
+# git clone git@github.com:username/avto-decor.git Avto-docer
 
-cd avto-decor
+cd Avto-docer
 ```
 
 ---
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 
 ```bash
 # Создаем файл .env в корне проекта
-nano /root/avto-decor/.env
+nano /root/Avto-docer/.env
 ```
 
 **Содержимое .env:**
@@ -113,63 +113,73 @@ python3 -c "from django.core.management.utils import get_random_secret_key; prin
 
 ---
 
-## 6. Перенос базы данных
+## 6. Перенос базы данных и media файлов
 
-### На локальной машине:
+### На локальной машине (Windows):
+
+**Вариант 1: Прямое копирование (если есть scp в Windows или используете Git Bash/WSL):**
 
 ```bash
-# Экспортируем данные из SQLite
-python manage.py dumpdata --exclude auth.permission --exclude contenttypes > db_backup.json
+# Переходим в директорию проекта
+cd F:\Projects\Avto-Decor
 
-# Или просто копируем файл БД
-scp db.sqlite3 root@195.133.49.72:/root/avto-decor/
+# Копируем базу данных на сервер
+scp db.sqlite3 root@195.133.49.72:/root/Avto-docer/
+
+# Копируем папку media на сервер (рекурсивно)
+scp -r media root@195.133.49.72:/root/Avto-docer/
+```
+
+**Вариант 2: Через WinSCP или FileZilla (GUI):**
+- Подключитесь к серверу через SFTP
+- Перетащите файл `db.sqlite3` в `/root/Avto-docer/`
+- Перетащите папку `media/` в `/root/Avto-docer/`
+
+**Вариант 3: Через PowerShell (если установлен OpenSSH):**
+
+```powershell
+# Переходим в директорию проекта
+cd F:\Projects\Avto-Decor
+
+# Копируем базу данных
+scp db.sqlite3 root@195.133.49.72:/root/Avto-docer/
+
+# Копируем media (рекурсивно)
+scp -r media root@195.133.49.72:/root/Avto-docer/
 ```
 
 ### На сервере:
 
 ```bash
-cd /root/avto-decor
+cd /root/Avto-docer
 source venv/bin/activate
 
-# Применяем миграции
+# Если копировали архив media, распаковываем
+tar -xzf media_backup.tar.gz
+rm media_backup.tar.gz
+
+# Устанавливаем права на media
+chmod -R 755 media/
+
+# Проверяем, что БД скопировалась
+ls -lh db.sqlite3
+
+# Применяем миграции (если нужно)
 python manage.py migrate
 
-# Если переносите SQLite файл:
-# python manage.py loaddata db_backup.json
-# ИЛИ просто скопируйте db.sqlite3 в корень проекта
+# Проверяем права на БД
+chmod 644 db.sqlite3
 ```
 
 ---
 
-## 7. Перенос media файлов
-
-### На локальной машине:
-
-```bash
-# Создаем архив media
-tar -czf media_backup.tar.gz media/
-
-# Копируем на сервер
-scp media_backup.tar.gz root@195.133.49.72:/root/avto-decor/
-```
-
-### На сервере:
-
-```bash
-cd /root/avto-decor
-tar -xzf media_backup.tar.gz
-rm media_backup.tar.gz
-
-# Устанавливаем права
-chmod -R 755 media/
-```
 
 ---
 
 ## 8. Сбор статических файлов
 
 ```bash
-cd /root/avto-decor
+cd /root/Avto-docer
 source venv/bin/activate
 
 # Собираем статические файлы
@@ -190,14 +200,14 @@ After=network.target
 [Service]
 User=root
 Group=root
-WorkingDirectory=/root/avto-decor
-Environment="PATH=/root/avto-decor/venv/bin"
+WorkingDirectory=/root/Avto-docer
+Environment="PATH=/root/Avto-docer/venv/bin"
 Environment="DJANGO_SETTINGS_MODULE=avto_decor.settings.production"
-ExecStart=/root/avto-decor/venv/bin/gunicorn \
+ExecStart=/root/Avto-docer/venv/bin/gunicorn \
     --workers 3 \
     --bind 127.0.0.1:8000 \
-    --access-logfile /root/avto-decor/logs/access.log \
-    --error-logfile /root/avto-decor/logs/error.log \
+    --access-logfile /root/Avto-docer/logs/access.log \
+    --error-logfile /root/Avto-docer/logs/error.log \
     avto_decor.wsgi:application
 
 [Install]
@@ -208,7 +218,7 @@ WantedBy=multi-user.target
 
 ```bash
 # Создаем директорию для логов
-mkdir -p /root/avto-decor/logs
+mkdir -p /root/Avto-docer/logs
 
 # Перезагружаем systemd
 systemctl daemon-reload
@@ -241,14 +251,14 @@ server {
 
     # Статические файлы
     location /static/ {
-        alias /root/avto-decor/staticfiles/;
+        alias /root/Avto-docer/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
     # Медиа файлы
     location /media/ {
-        alias /root/avto-decor/media/;
+        alias /root/Avto-docer/media/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
@@ -305,7 +315,7 @@ ufw status
 ## 12. Создание суперпользователя
 
 ```bash
-cd /root/avto-decor
+cd /root/Avto-docer
 source venv/bin/activate
 python manage.py createsuperuser
 ```
@@ -322,7 +332,7 @@ curl http://127.0.0.1:8000
 curl http://195.133.49.72
 
 # Проверяем логи
-tail -f /root/avto-decor/logs/error.log
+tail -f /root/Avto-docer/logs/error.log
 tail -f /var/log/nginx/error.log
 ```
 
@@ -345,7 +355,7 @@ tail -f /var/log/nginx/access.log
 tail -f /var/log/nginx/error.log
 
 # Обновление кода из Git
-cd /root/avto-decor
+cd /root/Avto-docer
 git pull
 source venv/bin/activate
 pip install -r requirements.txt
@@ -384,7 +394,7 @@ systemctl restart avto-decor
 ## Структура файлов на сервере
 
 ```
-/root/avto-decor/
+/root/Avto-docer/
 ├── .env                    # Переменные окружения
 ├── db.sqlite3              # База данных
 ├── media/                  # Медиа файлы
@@ -422,8 +432,8 @@ netstat -tlnp | grep 80
 
 4. Проверьте права доступа:
 ```bash
-chmod -R 755 /root/avto-decor
-chown -R root:root /root/avto-decor
+chmod -R 755 /root/Avto-docer
+chown -R root:root /root/Avto-docer
 ```
 
 ---
