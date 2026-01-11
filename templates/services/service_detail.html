@@ -56,7 +56,31 @@
         </h2>
         
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 md:p-12 border border-red-900/20">
-            <div class="prose prose-invert max-w-none">
+            <div class="prose prose-invert max-w-none text-gray-300">
+                <style>
+                    .prose h2 {
+                        color: #ffffff;
+                        font-size: 1.875rem;
+                        font-weight: 700;
+                        margin-top: 2rem;
+                        margin-bottom: 1rem;
+                    }
+                    .prose h2 span {
+                        color: #dc2626;
+                    }
+                    .prose h3 {
+                        color: #ffffff;
+                        font-size: 1.5rem;
+                        font-weight: 600;
+                        margin-top: 1.5rem;
+                        margin-bottom: 0.75rem;
+                    }
+                    .prose p {
+                        color: #d1d5db;
+                        line-height: 1.75;
+                        margin-bottom: 1rem;
+                    }
+                </style>
                 {{ service.content|safe }}
             </div>
         </div>
@@ -74,6 +98,32 @@
                 alt="{{ service.title }}"
                 class="w-full h-auto object-cover"
             />
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features List Section -->
+{% if service.features %}
+<section class="container mx-auto px-4 py-20">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl text-center mb-12 text-white">
+            Включает <span class="text-red-700">направления</span>
+        </h2>
+        
+        <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
+            <ul class="space-y-4">
+                {% for feature in service.get_features_list %}
+                <li class="flex items-start gap-4">
+                    <div class="flex-shrink-0 mt-1">
+                        <svg class="w-6 h-6 text-red-700" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <span class="text-gray-300 text-lg">{{ feature }}</span>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </section>

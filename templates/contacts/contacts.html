@@ -1,6 +1,22 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Контакты - Avto-Декор{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        border-radius: 0.5rem;
+    }
+    /* Стили для балуна Яндекс.Карт */
+    .ymaps-balloon {
+        border-radius: 0.5rem;
+    }
+    .ymaps-balloon__content {
+        padding: 15px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-20">
@@ -101,18 +117,7 @@
 
         <!-- Map -->
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg overflow-hidden border border-red-900/20 h-[600px]">
-            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
-                <div class="text-center p-8">
-                    <svg class="w-16 h-16 text-red-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <p class="text-white text-xl mb-2">Карта</p>
-                    <p class="text-gray-400">
-                        г. Петрозаводск, Гвардейская ул., 10
-                    </p>
-                </div>
-            </div>
+            <div id="map" class="w-full h-full"></div>
         </div>
     </div>
 
@@ -144,5 +149,65 @@
         </div>
     </div>
 </div>
+
+<!-- Яндекс.Карты API -->
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Координаты: г. Петрозаводск, Гвардейская ул., 10
+        // Примерные координаты для Петрозаводска, ул. Гвардейская
+        var coordinates = [61.7850, 34.3469]; // Петрозаводск, центр города
+        
+        // Инициализация карты
+        ymaps.ready(function() {
+            var myMap = new ymaps.Map('map', {
+                center: coordinates,
+                zoom: 16,
+                controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
+            }, {
+                searchControlProvider: 'yandex#search'
+            });
+
+            // Геокодирование адреса для точных координат
+            ymaps.geocode('Петрозаводск, Гвардейская ул., 10').then(function(res) {
+                var firstGeoObject = res.geoObjects.get(0);
+                if (firstGeoObject) {
+                    var coords = firstGeoObject.geometry.getCoordinates();
+                    myMap.setCenter(coords, 16);
+                    
+                    // Добавляем метку с кастомным цветом
+                    var myPlacemark = new ymaps.Placemark(coords, {
+                        balloonContentHeader: '<strong style="color: #dc2626;">Avto-Декор</strong>',
+                        balloonContentBody: '<div style="color: #333;">г. Петрозаводск, Гвардейская ул., 10<br>Телефон: <a href="tel:88142282380" style="color: #dc2626;">8(8142) 28-23-80</a></div>',
+                        balloonContentFooter: '<div style="color: #666; font-size: 12px;">Студия автомобильного интерьера</div>',
+                        hintContent: 'Avto-Декор'
+                    }, {
+                        // Используем стандартный маркер с кастомным цветом
+                        preset: 'islands#redIcon'
+                    });
+                    
+                    myMap.geoObjects.add(myPlacemark);
+                    
+                    // Открываем балун при клике
+                    myPlacemark.events.add('click', function() {
+                        myPlacemark.balloon.open();
+                    });
+                } else {
+                    // Если геокодирование не удалось, используем примерные координаты
+                    var myPlacemark = new ymaps.Placemark(coordinates, {
+                        balloonContentHeader: '<strong style="color: #dc2626;">Avto-Декор</strong>',
+                        balloonContentBody: '<div style="color: #333;">г. Петрозаводск, Гвардейская ул., 10<br>Телефон: <a href="tel:88142282380" style="color: #dc2626;">8(8142) 28-23-80</a></div>',
+                        balloonContentFooter: '<div style="color: #666; font-size: 12px;">Студия автомобильного интерьера</div>',
+                        hintContent: 'Avto-Декор'
+                    }, {
+                        preset: 'islands#redIcon'
+                    });
+                    
+                    myMap.geoObjects.add(myPlacemark);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
 

@@ -24,7 +24,7 @@ class Work(BaseModel):
         help_text='Категория, к которой относится работа'
     )
     image = models.ImageField(
-        upload_to='works/',
+        upload_to='img/works/',
         verbose_name='Изображение',
         help_text='Фотография выполненной работы'
     )

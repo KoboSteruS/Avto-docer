@@ -19,8 +19,8 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         # Получаем первые 6 активных услуг для отображения на главной
         context['services'] = Service.objects.filter(is_active=True).order_by('order', 'title')[:6]
-        # Получаем больше работ для ротации (минимум 9, чтобы было достаточно для смены)
+        # Получаем все активные работы для ротации (без ограничений по категории)
         all_works = Work.objects.filter(is_active=True).order_by('?')
-        context['works'] = list(all_works[:9])  # Берем 9 работ для ротации
+        context['works'] = list(all_works)  # Все работы для переливания
         return context
 

@@ -58,25 +58,67 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for service in services %}
-        <a href="{% url 'services:detail' slug=service.slug %}" class="group bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg overflow-hidden border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block">
-            <div class="h-48 overflow-hidden">
-                {% if service.image %}
-                <img
-                    src="{{ service.image.url }}"
-                    alt="{{ service.title }}"
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                {% else %}
-                <img
-                    src="https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjcyNjQ0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                    alt="{{ service.title }}"
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                {% endif %}
-            </div>
-            <div class="p-6">
-                <h3 class="text-xl mb-3 text-white">{{ service.title }}</h3>
-                <p class="text-gray-400">{{ service.short_description|default:service.description|truncatewords:15 }}</p>
+        {% load static %}
+        {% comment %}Маппинг изображений для услуг{% endcomment %}
+        {% if service.slug == 'avtotyuning' %}
+            {% static 'img/tuning.jpg' as service_bg_image %}
+        {% elif service.slug == 'akvaprint' %}
+            {% static 'img/aquaprint-7777.jpg' as service_bg_image %}
+        {% elif service.slug == 'aerografiya' %}
+            {% static 'img/aero.jpg' as service_bg_image %}
+        {% elif service.slug == 'vosstanovlenie-air-bag' %}
+            {% static 'img/airbag.jpg' as service_bg_image %}
+        {% elif service.slug == 'dekorativnaya-otdelka-salona' %}
+            {% static 'img/derevo.jpg' as service_bg_image %}
+        {% elif service.slug == 'detejling' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'zolocheni' %}
+            {% static 'img/gold.jpg' as service_bg_image %}
+        {% elif service.slug == 'kozhgalantereya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'nanokeramika' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'music' %}
+            {% static 'img/music.jpg' as service_bg_image %}
+        {% elif service.slug == 'pereoborudovanie-salonov' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'peretyazhka-salona' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'polirovka-avtomobilya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'restavratsiya-mebeli' %}
+            {% static 'img/mebel.jpg' as service_bg_image %}
+        {% elif service.slug == 'signalizatsiya' %}
+            {% static 'img/signal.jpg' as service_bg_image %}
+        {% elif service.slug == 'ustanovka-podogreva-sidenij-i-rulya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'ustanovka-predvpuskovogo-podogrevatelya-dvigatelya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'flokirovaniy' %}
+            {% static 'img/flok.jpg' as service_bg_image %}
+        {% elif service.slug == 'hrom' %}
+            {% static 'img/hrom.jpg' as service_bg_image %}
+        {% elif service.slug == 'prof-khimchistka' %}
+            {% static 'img/him.jpg' as service_bg_image %}
+        {% elif service.slug == 'chip-tyuning' %}
+            {% static 'img/tuning.jpg' as service_bg_image %}
+        {% elif service.slug == 'vibro-shumoizolyatsiya' %}
+            {% static 'img/vibro.jpg' as service_bg_image %}
+        {% else %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% endif %}
+        
+        <a href="{% url 'services:detail' slug=service.slug %}" class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block">
+            <!-- Фоновое изображение -->
+            <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-500" style="background-image: url('{{ service_bg_image }}');"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/75 via-gray-900/70 to-gray-800/75"></div>
+            
+            <!-- Контент -->
+            <div class="relative h-48 flex items-center justify-center p-6">
+                <div class="text-center">
+                    <h3 class="text-xl mb-2 text-white font-semibold">{{ service.title }}</h3>
+                    <p class="text-gray-300 text-sm">{{ service.short_description|default:service.description|truncatewords:12 }}</p>
+                </div>
             </div>
         </a>
         {% empty %}
@@ -199,17 +241,36 @@
         Наши <span class="text-red-700">Работы</span>
     </h2>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto" id="works-carousel">
-        <!-- Первые 3 работы отображаются сразу -->
-        {% for work in works|slice:":3" %}
-        <div class="work-item group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 aspect-square opacity-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mx-auto" id="works-carousel" style="width: 90%; max-width: 1200px;">
+        <style>
+            @media (min-width: 768px) {
+                #works-carousel {
+                    width: 70% !important;
+                }
+            }
+        </style>
+        <!-- Первые 6 работ отображаются сразу -->
+        {% for work in works|slice:":6" %}
+        <div class="work-item group relative overflow-hidden rounded-xl border-2 border-gray-800 hover:border-red-700 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 aspect-square">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
+            <!-- Основное изображение -->
             <img
                 src="{{ work.image.url }}"
-                alt="{{ work.category.name }} - работа {{ forloop.counter }}"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                alt="Работа {{ forloop.counter }}"
+                class="work-image-main w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                 data-work-index="{{ forloop.counter0 }}"
+                loading="lazy"
             />
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+            <!-- Изображение для crossfade -->
+            <img
+                src="{{ work.image.url }}"
+                alt="Работа {{ forloop.counter }}"
+                class="work-image-overlay w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out absolute inset-0 opacity-0"
+                loading="lazy"
+            />
+            <div class="absolute bottom-0 left-0 right-0 p-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="text-white text-sm font-medium truncate">Наша работа</p>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -217,7 +278,7 @@
     <div class="text-center mt-12">
         <a
             href="{% url 'works:list' %}"
-            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-all duration-300 px-8 py-4 rounded-lg text-lg font-medium shadow-lg shadow-red-900/30 hover:shadow-xl hover:shadow-red-900/40 hover:scale-105"
         >
             Все Работы
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,79 +294,72 @@ document.addEventListener('DOMContentLoaded', function() {
         {% for work in works %}
         {
             image: "{{ work.image.url }}",
-            category: "{{ work.category.name }}",
             index: {{ forloop.counter0 }}
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ];
     
-    if (worksData.length < 3) return; // Нужно минимум 3 работы
+    if (worksData.length < 6) return; // Нужно минимум 6 работ
     
     const carousel = document.getElementById('works-carousel');
     const workItems = carousel.querySelectorAll('.work-item');
-    let currentIndices = [0, 1, 2]; // Индексы текущих отображаемых работ
-    let usedIndices = new Set([0, 1, 2]); // Индексы, которые уже использовались
-    let rotationIndex = 0; // Индекс позиции для ротации (0=слева, 1=центр, 2=справа)
+    let currentIndices = [0, 1, 2, 3, 4, 5]; // Индексы текущих отображаемых работ
     
-    function getNextAvailableIndex() {
-        // Находим следующий доступный индекс, который еще не использовался
-        for (let i = 0; i < worksData.length; i++) {
-            if (!usedIndices.has(i)) {
-                return i;
+    function getRandomWorkIndex() {
+        // Получаем случайный индекс из всех доступных работ
+        // Если работ больше 6, стараемся не повторять текущие
+        if (worksData.length > 6) {
+            const availableIndices = worksData
+                .map((_, idx) => idx)
+                .filter(idx => !currentIndices.includes(idx));
+            
+            if (availableIndices.length > 0) {
+                return availableIndices[Math.floor(Math.random() * availableIndices.length)];
             }
         }
-        // Если все использованы, сбрасываем и начинаем заново
-        usedIndices.clear();
-        usedIndices.add(currentIndices[0]);
-        usedIndices.add(currentIndices[1]);
-        usedIndices.add(currentIndices[2]);
-        // Ищем индекс, который не в текущих
-        for (let i = 0; i < worksData.length; i++) {
-            if (!usedIndices.has(i)) {
-                return i;
-            }
-        }
-        // Если все равно не нашли, возвращаем следующий по кругу
-        return (Math.max(...currentIndices) + 1) % worksData.length;
+        // Если работ <= 6 или все уже используются, возвращаем любой случайный
+        return Math.floor(Math.random() * worksData.length);
     }
     
     function rotateWork() {
-        const itemToChange = workItems[rotationIndex];
-        const img = itemToChange.querySelector('img');
+        // Случайно выбираем позицию для замены (хаотично)
+        const randomPosition = Math.floor(Math.random() * 6);
+        const itemToChange = workItems[randomPosition];
+        const imgMain = itemToChange.querySelector('.work-image-main');
+        const imgOverlay = itemToChange.querySelector('.work-image-overlay');
         
-        // Получаем новый индекс
-        const newIndex = getNextAvailableIndex();
-        
-        // Удаляем старый индекс из использованных (если он не в других позициях)
-        const oldIndex = currentIndices[rotationIndex];
-        if (!currentIndices.includes(oldIndex)) {
-            usedIndices.delete(oldIndex);
-        }
+        // Получаем случайный индекс (все фотки могут переливаться)
+        const newIndex = getRandomWorkIndex();
         
         // Обновляем текущий индекс
-        currentIndices[rotationIndex] = newIndex;
-        usedIndices.add(newIndex);
+        currentIndices[randomPosition] = newIndex;
         
-        // Плавное исчезновение
-        itemToChange.style.opacity = '0';
-        itemToChange.style.transition = 'opacity 0.5s ease-in-out';
+        // Crossfade эффект: загружаем новое изображение в overlay
+        imgOverlay.src = worksData[newIndex].image;
+        imgOverlay.alt = 'Работа ' + (newIndex + 1);
+        imgOverlay.setAttribute('data-work-index', newIndex);
         
+        // Показываем overlay (новое изображение), скрываем main (старое)
+        imgOverlay.style.opacity = '1';
+        imgOverlay.style.transition = 'opacity 0.5s ease-in-out';
+        imgMain.style.opacity = '0';
+        imgMain.style.transition = 'opacity 0.5s ease-in-out';
+        
+        // После завершения перехода, меняем местами
         setTimeout(() => {
-            // Меняем изображение
-            img.src = worksData[newIndex].image;
-            img.alt = worksData[newIndex].category + ' - работа ' + (newIndex + 1);
-            img.setAttribute('data-work-index', newIndex);
+            // Меняем src основного изображения
+            imgMain.src = worksData[newIndex].image;
+            imgMain.alt = 'Работа ' + (newIndex + 1);
+            imgMain.setAttribute('data-work-index', newIndex);
             
-            // Плавное появление
-            itemToChange.style.opacity = '1';
+            // Сбрасываем opacity
+            imgMain.style.opacity = '1';
+            imgOverlay.style.opacity = '0';
         }, 500);
-        
-        // Переходим к следующей позиции (слева направо, затем снова слева)
-        rotationIndex = (rotationIndex + 1) % 3;
     }
     
-    // Запускаем ротацию каждые 4 секунды
-    setInterval(rotateWork, 4000);
+    // Запускаем ротацию каждые 1.2 секунды (быстро, но с плавным переходом)
+    setInterval(rotateWork, 1200);
 });
 </script>
 {% endif %}

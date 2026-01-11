@@ -14,39 +14,98 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {% for service in services %}
-        <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20 hover:border-red-700/50 transition-all">
-            <div class="flex items-start gap-6">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-red-700/20 rounded-lg flex items-center justify-center">
-                        {% if service.image %}
-                        <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-12 h-12 object-cover rounded">
-                        {% else %}
-                        <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
+        {% comment %}Маппинг изображений для услуг{% endcomment %}
+        {% if service.slug == 'avtotyuning' %}
+            {% static 'img/tuning.jpg' as service_bg_image %}
+        {% elif service.slug == 'akvaprint' %}
+            {% static 'img/aquaprint-7777.jpg' as service_bg_image %}
+        {% elif service.slug == 'aerografiya' %}
+            {% static 'img/aero.jpg' as service_bg_image %}
+        {% elif service.slug == 'vosstanovlenie-air-bag' %}
+            {% static 'img/airbag.jpg' as service_bg_image %}
+        {% elif service.slug == 'dekorativnaya-otdelka-salona' %}
+            {% static 'img/derevo.jpg' as service_bg_image %}
+        {% elif service.slug == 'detejling' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'zolocheni' %}
+            {% static 'img/gold.jpg' as service_bg_image %}
+        {% elif service.slug == 'kozhgalantereya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'nanokeramika' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'music' %}
+            {% static 'img/music.jpg' as service_bg_image %}
+        {% elif service.slug == 'pereoborudovanie-salonov' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'peretyazhka-salona' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'polirovka-avtomobilya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'restavratsiya-mebeli' %}
+            {% static 'img/mebel.jpg' as service_bg_image %}
+        {% elif service.slug == 'signalizatsiya' %}
+            {% static 'img/signal.jpg' as service_bg_image %}
+        {% elif service.slug == 'ustanovka-podogreva-sidenij-i-rulya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'ustanovka-predvpuskovogo-podogrevatelya-dvigatelya' %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% elif service.slug == 'flokirovaniy' %}
+            {% static 'img/flok.jpg' as service_bg_image %}
+        {% elif service.slug == 'hrom' %}
+            {% static 'img/hrom.jpg' as service_bg_image %}
+        {% elif service.slug == 'prof-khimchistka' %}
+            {% static 'img/him.jpg' as service_bg_image %}
+        {% elif service.slug == 'chip-tyuning' %}
+            {% static 'img/tuning.jpg' as service_bg_image %}
+        {% elif service.slug == 'vibro-shumoizolyatsiya' %}
+            {% static 'img/vibro.jpg' as service_bg_image %}
+        {% else %}
+            {% static 'img/salon_small.jpg' as service_bg_image %}
+        {% endif %}
+        
+        <div class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all">
+            <!-- Фоновое изображение -->
+            <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-300" style="background-image: url('{{ service_bg_image }}');"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/75 via-gray-900/70 to-gray-800/75"></div>
+            
+            <!-- Контент -->
+            <div class="relative p-8">
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30">
+                            {% if service.image %}
+                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-12 h-12 object-cover rounded">
+                            {% else %}
+                            <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <h2 class="text-2xl mb-3 text-white">
+                            <a href="/uslugi/{{ service.slug }}/" class="hover:text-red-700 transition-colors">
+                                {{ service.title }}
+                            </a>
+                        </h2>
+                        <p class="text-gray-400 mb-6 text-sm leading-relaxed">{{ service.short_description|default:service.description|truncatewords:20 }}</p>
+                        
+                        {% if service.features %}
+                        <h3 class="text-white mb-3 text-lg">Включает:</h3>
+                        <ul class="space-y-2">
+                            {% for feature in service.get_features_list|slice:":5" %}
+                            <li class="flex items-center gap-2 text-gray-300 text-sm">
+                                <div class="w-1.5 h-1.5 bg-red-700 rounded-full flex-shrink-0"></div>
+                                {{ feature }}
+                            </li>
+                            {% endfor %}
+                            {% if service.get_features_list|length > 5 %}
+                            <li class="text-gray-400 text-sm italic">и другие...</li>
+                            {% endif %}
+                        </ul>
                         {% endif %}
                     </div>
-                </div>
-                
-                <div class="flex-1">
-                    <h2 class="text-2xl mb-3 text-white">
-                        <a href="/uslugi/{{ service.slug }}/" class="hover:text-red-700 transition-colors">
-                            {{ service.title }}
-                        </a>
-                    </h2>
-                    <p class="text-gray-400 mb-6">{{ service.short_description|default:service.description }}</p>
-                    
-                    {% if service.features %}
-                    <h3 class="text-white mb-3">Включает:</h3>
-                    <ul class="space-y-2">
-                        {% for feature in service.get_features_list %}
-                        <li class="flex items-center gap-2 text-gray-300">
-                            <div class="w-1.5 h-1.5 bg-red-700 rounded-full flex-shrink-0"></div>
-                            {{ feature }}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
                 </div>
             </div>
         </div>
