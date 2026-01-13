@@ -9,6 +9,23 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <script>
+        // Кастомные цвета из брендбука
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        red: {
+                            700: '#9C111F', // RGB: 156, 17, 31 - Основной темно-бордовый
+                            800: '#7D0C1B', // RGB: 125, 12, 27 - Темный приглушенный бордовый
+                            900: '#7D0C1B', // RGB: 125, 12, 27 - Для границ и фонов
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
         body {
             background: linear-gradient(to bottom right, #111827, #000000, #111827);
