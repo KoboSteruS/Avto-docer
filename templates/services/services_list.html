@@ -15,69 +15,19 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {% for service in services %}
-        {% comment %}Маппинг изображений для услуг{% endcomment %}
-        {% if service.slug == 'avtotyuning' %}
-            {% static 'img/tuning.jpg' as service_bg_image %}
-        {% elif service.slug == 'akvaprint' %}
-            {% static 'img/aquaprint-7777.jpg' as service_bg_image %}
-        {% elif service.slug == 'aerografiya' %}
-            {% static 'img/aero.jpg' as service_bg_image %}
-        {% elif service.slug == 'vosstanovlenie-air-bag' %}
-            {% static 'img/airbag.jpg' as service_bg_image %}
-        {% elif service.slug == 'dekorativnaya-otdelka-salona' %}
-            {% static 'img/derevo.jpg' as service_bg_image %}
-        {% elif service.slug == 'detejling' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'zolocheni' %}
-            {% static 'img/gold.jpg' as service_bg_image %}
-        {% elif service.slug == 'kozhgalantereya' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'nanokeramika' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'music' %}
-            {% static 'img/music.jpg' as service_bg_image %}
-        {% elif service.slug == 'pereoborudovanie-salonov' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'peretyazhka-salona' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'polirovka-avtomobilya' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'restavratsiya-mebeli' %}
-            {% static 'img/mebel.jpg' as service_bg_image %}
-        {% elif service.slug == 'signalizatsiya' %}
-            {% static 'img/signal.jpg' as service_bg_image %}
-        {% elif service.slug == 'ustanovka-podogreva-sidenij-i-rulya' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'ustanovka-predvpuskovogo-podogrevatelya-dvigatelya' %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% elif service.slug == 'flokirovaniy' %}
-            {% static 'img/flok.jpg' as service_bg_image %}
-        {% elif service.slug == 'hrom' %}
-            {% static 'img/hrom.jpg' as service_bg_image %}
-        {% elif service.slug == 'prof-khimchistka' %}
-            {% static 'img/him.jpg' as service_bg_image %}
-        {% elif service.slug == 'chip-tyuning' %}
-            {% static 'img/tuning.jpg' as service_bg_image %}
-        {% elif service.slug == 'vibro-shumoizolyatsiya' %}
-            {% static 'img/vibro.jpg' as service_bg_image %}
-        {% else %}
-            {% static 'img/salon_small.jpg' as service_bg_image %}
-        {% endif %}
-        
-        <div class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all">
-            <!-- Фоновое изображение -->
-            <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-300" style="background-image: url('{{ service_bg_image }}');"></div>
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/75 via-gray-900/70 to-gray-800/75"></div>
+        <div class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all bg-black">
+            <!-- Паттерн с логотипами Avto-Декор на черном фоне -->
+            <div class="absolute inset-0 opacity-12" style="background-image: url('{% static 'img/Logo.png' %}'); background-repeat: repeat; background-size: 250px 250px; background-position: 0 0; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.6) contrast(1.2);"></div>
             
             <!-- Контент -->
             <div class="relative p-8">
                 <div class="flex items-start gap-6">
-                    <div class="flex-shrink-0">
-                        <div class="w-16 h-16 bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30">
+                    <div class="flex-shrink-0 self-stretch">
+                        <div class="h-full bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30" style="min-height: 200px; width: 200px;">
                             {% if service.image %}
-                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-12 h-12 object-cover rounded">
+                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-full h-full object-cover rounded" style="min-height: 200px;">
                             {% else %}
-                            <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-16 h-16 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             {% endif %}
