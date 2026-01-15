@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load content_tags %}
 
 {% block title %}Наши Работы - Avto-Декор{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-20">
     <h1 class="text-5xl text-center mb-6 text-white">
-        Наши <span class="text-red-700">Работы</span>
+        {% get_content 'works' 'title' 'Наши <span class="text-red-700">Работы</span>' %}
     </h1>
     <p class="text-xl text-center text-gray-400 mb-12 max-w-3xl mx-auto">
-        Портфолио выполненных работ по тюнингу автомобильных салонов
+        {% get_content 'works' 'subtitle' 'Портфолио выполненных работ по тюнингу автомобильных салонов' %}
     </p>
 
     <!-- Categories Grid -->

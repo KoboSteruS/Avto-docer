@@ -116,6 +116,15 @@
                             ОТЗЫВЫ
                         </a>
                     </li>
+                    {% url 'articles:list' as articles_url %}
+                    <li class="flex-1">
+                        <a
+                            href="{{ articles_url }}"
+                            class="block px-4 py-4 text-center transition-colors {% if request.path|slice:':6' == '/stati' %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                        >
+                            СТАТЬИ
+                        </a>
+                    </li>
                     {% url 'core:about' as about_url %}
                     <li class="flex-1">
                         <a
@@ -181,6 +190,16 @@
                             onclick="closeMobileMenu()"
                         >
                             ОТЗЫВЫ
+                        </a>
+                    </li>
+                    {% url 'articles:list' as articles_url %}
+                    <li>
+                        <a
+                            href="{{ articles_url }}"
+                            class="block px-4 py-3 text-center transition-colors {% if request.path|slice:':6' == '/stati' %}bg-red-700 text-white{% else %}text-gray-300 hover:bg-red-900/30 hover:text-white{% endif %}"
+                            onclick="closeMobileMenu()"
+                        >
+                            СТАТЬИ
                         </a>
                     </li>
                     {% url 'core:about' as about_url %}

@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load content_tags %}
 
 {% block title %}Услуги - Avto-Декор{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-20">
     <h1 class="text-5xl text-center mb-6 text-white">
-        Наши <span class="text-red-700">Услуги</span>
+        {% get_content 'services' 'title' 'Наши <span class="text-red-700">Услуги</span>' %}
     </h1>
     <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">
-        Мы предлагаем полный спектр услуг по тюнингу и улучшению автомобильного интерьера
+        {% get_content 'services' 'subtitle' 'Мы предлагаем полный спектр услуг по тюнингу и улучшению автомобильного интерьера' %}
     </p>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -118,9 +119,9 @@
 
     <!-- CTA -->
     <div class="mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-3xl mb-4 text-white">Нужна консультация?</h2>
+        <h2 class="text-3xl mb-4 text-white">{% get_content 'services' 'cta_title' 'Нужна консультация?' %}</h2>
         <p class="text-gray-300 mb-6">
-            Свяжитесь с нами для подробной консультации и расчета стоимости услуг
+            {% get_content 'services' 'cta_text' 'Свяжитесь с нами для подробной консультации и расчета стоимости услуг' %}
         </p>
         <a
             href="tel:88142282380"

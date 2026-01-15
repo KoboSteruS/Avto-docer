@@ -13,6 +13,7 @@ urlpatterns = [
     path('', include('works.urls')),
     path('otzyvy/', include('reviews.urls')),
     path('kontakty/', include('contacts.urls')),
+    path('stati/', include('articles.urls')),
 ]
 
 # Статика и медиа для разработки

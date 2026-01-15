@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load content_tags %}
 
 {% block title %}{{ service.title }} - Avto-Декор{% endblock %}
 
@@ -37,7 +38,7 @@
     <div class="max-w-4xl mx-auto">
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 md:p-12 border border-red-900/20">
             <h2 class="text-3xl mb-6 text-white">
-                О <span class="text-red-700">услуге</span>
+                {% get_content 'services' 'about_title' 'О <span class="text-red-700">услуге</span>' %}
             </h2>
             <div class="text-gray-300 text-lg leading-relaxed whitespace-pre-line">
                 {{ service.description }}
@@ -52,7 +53,7 @@
 <section class="container mx-auto px-4 py-20">
     <div class="max-w-6xl mx-auto">
         <h2 class="text-4xl text-center mb-12 text-white">
-            Подробнее об <span class="text-red-700">услуге</span>
+            {% get_content 'services' 'details_title' 'Подробнее об <span class="text-red-700">услуге</span>' %}
         </h2>
         
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 md:p-12 border border-red-900/20">
@@ -108,7 +109,7 @@
 <section class="container mx-auto px-4 py-20">
     <div class="max-w-4xl mx-auto">
         <h2 class="text-4xl text-center mb-12 text-white">
-            Включает <span class="text-red-700">направления</span>
+            {% get_content 'services' 'features_title' 'Включает <span class="text-red-700">направления</span>' %}
         </h2>
         
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
@@ -133,7 +134,7 @@
 <section class="container mx-auto px-4 py-20">
     <div class="max-w-4xl mx-auto">
         <h2 class="text-4xl text-center mb-12 text-white">
-            Преимущества <span class="text-red-700">услуги</span>
+            {% get_content 'services' 'advantages_title' 'Преимущества <span class="text-red-700">услуги</span>' %}
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -207,9 +208,9 @@
 <!-- CTA Section -->
 <section class="container mx-auto px-4 py-20">
     <div class="bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-4xl mb-4 text-white">Заинтересовала услуга?</h2>
+        <h2 class="text-4xl mb-4 text-white">{% get_content 'services' 'service_cta_title' 'Заинтересовала услуга?' %}</h2>
         <p class="text-xl text-gray-300 mb-8">
-            Свяжитесь с нами для консультации и расчета стоимости
+            {% get_content 'services' 'service_cta_text' 'Свяжитесь с нами для консультации и расчета стоимости' %}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a

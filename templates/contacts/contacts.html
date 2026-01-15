@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load content_tags %}
 
 {% block title %}Контакты - Avto-Декор{% endblock %}
 
@@ -21,17 +22,17 @@
 {% block content %}
 <div class="container mx-auto px-4 py-20">
     <h1 class="text-5xl text-center mb-6 text-white">
-        <span class="text-red-700">Контакты</span>
+        {% get_content 'contacts' 'title' '<span class="text-red-700">Контакты</span>' %}
     </h1>
     <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">
-        Свяжитесь с нами для консультации и записи на обслуживание
+        {% get_content 'contacts' 'subtitle' 'Свяжитесь с нами для консультации и записи на обслуживание' %}
     </p>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- Contact Information -->
         <div class="space-y-8">
             <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
-                <h2 class="text-2xl mb-6 text-white">Контактная информация</h2>
+                <h2 class="text-2xl mb-6 text-white">{% get_content 'contacts' 'info_title' 'Контактная информация' %}</h2>
 
                 <div class="space-y-6">
                     <!-- Phone -->
@@ -107,7 +108,7 @@
 
             <!-- Contact Form -->
             <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
-                <h2 class="text-2xl mb-6 text-white">Оставить заявку</h2>
+                <h2 class="text-2xl mb-6 text-white">{% get_content 'contacts' 'form_title' 'Оставить заявку' %}</h2>
                 
                 {% if messages %}
                 <div class="mb-6">
@@ -186,10 +187,9 @@
             
             <!-- Additional Info -->
             <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20">
-                <h2 class="text-2xl mb-4 text-white">Как нас найти</h2>
+                <h2 class="text-2xl mb-4 text-white">{% get_content 'contacts' 'find_title' 'Как нас найти' %}</h2>
                 <p class="text-gray-400 leading-relaxed">
-                    Мы находимся в центре города. Есть удобная парковка для клиентов. 
-                    Рекомендуем предварительно записаться по телефону для точного планирования времени.
+                    {% get_content 'contacts' 'find_text' 'Мы находимся в центре города. Есть удобная парковка для клиентов. Рекомендуем предварительно записаться по телефону для точного планирования времени.' %}
                 </p>
             </div>
         </div>
@@ -202,9 +202,9 @@
 
     <!-- CTA -->
     <div class="mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-3xl mb-4 text-white">Готовы обсудить ваш проект?</h2>
+        <h2 class="text-3xl mb-4 text-white">{% get_content 'contacts' 'cta_title' 'Готовы обсудить ваш проект?' %}</h2>
         <p class="text-gray-300 mb-6">
-            Позвоните нам или приезжайте в нашу студию для бесплатной консультации
+            {% get_content 'contacts' 'cta_text' 'Позвоните нам или приезжайте в нашу студию для бесплатной консультации' %}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a

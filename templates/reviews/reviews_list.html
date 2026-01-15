@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load content_tags %}
 
 {% block title %}Отзывы - Avto-Декор{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-20">
     <h1 class="text-5xl text-center mb-6 text-white">
-        Отзывы <span class="text-red-700">Клиентов</span>
+        {% get_content 'reviews' 'title' 'Отзывы <span class="text-red-700">Клиентов</span>' %}
     </h1>
     <p class="text-xl text-center text-gray-400 mb-12 max-w-3xl mx-auto">
-        Мнения наших клиентов о качестве работы студии Avto-Декор
+        {% get_content 'reviews' 'subtitle' 'Мнения наших клиентов о качестве работы студии Avto-Декор' %}
     </p>
 
     <!-- Messages -->
@@ -46,7 +47,7 @@
 
     <!-- Add Review Form -->
     <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg p-8 border border-red-900/20 mb-12 max-w-2xl mx-auto">
-        <h2 class="text-2xl text-white mb-6 text-center">Оставить отзыв</h2>
+        <h2 class="text-2xl text-white mb-6 text-center">{% get_content 'reviews' 'form_title' 'Оставить отзыв' %}</h2>
         
         <form method="post" action="{% url 'reviews:list' %}">
             {% csrf_token %}
@@ -178,9 +179,9 @@
 
     <!-- CTA -->
     <div class="mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-3xl mb-4 text-white">Станьте нашим клиентом</h2>
+        <h2 class="text-3xl mb-4 text-white">{% get_content 'reviews' 'cta_title' 'Станьте нашим клиентом' %}</h2>
         <p class="text-gray-300 mb-6">
-            Присоединяйтесь к сотням довольных клиентов студии Avto-Декор
+            {% get_content 'reviews' 'cta_text' 'Присоединяйтесь к сотням довольных клиентов студии Avto-Декор' %}
         </p>
         <a
             href="tel:88142282380"

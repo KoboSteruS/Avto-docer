@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load content_tags %}
+
+{% block title %}Статьи - Avto-Декор{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black">
+    <div class="container mx-auto px-4 py-6">
+    <!-- Articles Feed (Telegram-style) -->
+    {% if articles %}
+    <div class="max-w-2xl mx-auto space-y-6">
+        {% for article in articles %}
+        <article class="bg-black rounded-lg border border-red-900/30 overflow-hidden">
+            <!-- Медиа (видео или изображение) -->
+            {% if article.video_file %}
+            <div class="w-full bg-black rounded-lg overflow-hidden">
+                <video 
+                    class="w-full" 
+                    controls 
+                    preload="metadata"
+                    style="max-height: 400px;"
+                >
+                    <source src="{{ article.video_file.url }}" type="video/mp4">
+                    <source src="{{ article.video_file.url }}" type="video/webm">
+                    Ваш браузер не поддерживает видео.
+                </video>
+            </div>
+            {% elif article.video_url %}
+            <div class="w-full bg-black rounded-lg overflow-hidden">
+                {% if article.is_youtube_url or article.is_vimeo_url %}
+                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                    <iframe 
+                        src="{{ article.get_video_embed_url }}"
+                        class="absolute top-0 left-0 w-full h-full"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+                {% else %}
+                <video 
+                    class="w-full" 
+                    controls 
+                    preload="metadata"
+                    style="max-height: 400px;"
+                >
+                    <source src="{{ article.video_url }}" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+                {% endif %}
+            </div>
+            {% elif article.image %}
+            <div class="w-full rounded-lg overflow-hidden">
+                <img 
+                    src="{{ article.image.url }}" 
+                    alt="{{ article.title }}"
+                    class="w-full h-auto object-cover"
+                    style="max-height: 400px;"
+                    loading="lazy"
+                />
+            </div>
+            {% endif %}
+            
+            <!-- Контент -->
+            <div class="p-6">
+                <!-- Заголовок -->
+                    <h2 class="text-2xl mb-4 text-white">
+                        {% if article.slug %}
+                        <a href="{% url 'articles:detail' slug=article.slug %}" class="hover:text-red-600 transition-colors">
+                            {{ article.title }}
+                        </a>
+                        {% else %}
+                        <span>{{ article.title }}</span>
+                        {% endif %}
+                    </h2>
+                
+                <!-- Текст с ограничением -->
+                <div class="article-content-wrapper" data-article-id="{{ article.id }}">
+                    <div class="article-content-collapsed" style="max-height: 6em; overflow: hidden;">
+                        <div class="article-content-full" style="word-wrap: break-word; overflow-wrap: break-word; color: #ffffff; font-size: 16px; line-height: 1.7;">
+                            {{ article.content|safe }}
+                        </div>
+                    </div>
+                    <div class="article-content-expanded hidden">
+                        <div class="article-content-full" style="word-wrap: break-word; overflow-wrap: break-word; color: #ffffff; font-size: 16px; line-height: 1.7;">
+                            {{ article.content|safe }}
+                        </div>
+                    </div>
+                    <button 
+                        class="article-expand-btn mt-3 text-red-600 hover:text-red-500 transition-colors text-sm font-medium cursor-pointer"
+                        onclick="toggleArticle({{ article.id }})"
+                    >
+                        Развернуть
+                    </button>
+                    <button 
+                        class="article-collapse-btn mt-3 text-red-600 hover:text-red-500 transition-colors text-sm font-medium hidden cursor-pointer"
+                        onclick="toggleArticle({{ article.id }})"
+                    >
+                        Свернуть
+                    </button>
+                </div>
+                
+                <!-- Мета информация -->
+                <div class="flex items-center gap-4 mt-4 pt-4 border-t border-red-900/30 text-sm text-gray-400">
+                    <span>{{ article.created_at|date:"d.m.Y в H:i" }}</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        {{ article.views }}
+                    </span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-12 flex justify-center gap-2 max-w-2xl mx-auto">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-900 hover:bg-red-900/30 border border-red-900/30 rounded-lg text-white transition-colors">
+            Назад
+        </a>
+        {% endif %}
+        
+        <span class="px-4 py-2 bg-gray-900 border border-red-900/30 rounded-lg text-white">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-900 hover:bg-red-900/30 border border-red-900/30 rounded-lg text-white transition-colors">
+            Вперед
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-20 max-w-2xl mx-auto">
+        <p class="text-gray-400 text-xl">Статьи будут добавлены в ближайшее время</p>
+    </div>
+    {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleArticle(articleId) {
+    const wrapper = document.querySelector(`[data-article-id="${articleId}"]`);
+    const collapsed = wrapper.querySelector('.article-content-collapsed');
+    const expanded = wrapper.querySelector('.article-content-expanded');
+    const expandBtn = wrapper.querySelector('.article-expand-btn');
+    const collapseBtn = wrapper.querySelector('.article-collapse-btn');
+    
+    if (collapsed.classList.contains('hidden')) {
+        // Сворачиваем
+        collapsed.classList.remove('hidden');
+        expanded.classList.add('hidden');
+        expandBtn.classList.remove('hidden');
+        collapseBtn.classList.add('hidden');
+    } else {
+        // Разворачиваем
+        collapsed.classList.add('hidden');
+        expanded.classList.remove('hidden');
+        expandBtn.classList.add('hidden');
+        collapseBtn.classList.remove('hidden');
+    }
+}
+
+// Скрываем кнопку "Развернуть" если контент короткий
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.article-content-wrapper').forEach(wrapper => {
+        const collapsed = wrapper.querySelector('.article-content-collapsed');
+        const expandBtn = wrapper.querySelector('.article-expand-btn');
+        
+        if (collapsed) {
+            const contentHeight = collapsed.scrollHeight;
+            const maxHeight = parseInt(getComputedStyle(collapsed).maxHeight);
+            
+            // Если контент помещается в ограниченную высоту, скрываем кнопку
+            if (contentHeight <= maxHeight) {
+                expandBtn.style.display = 'none';
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.article-content-full {
+    color: #ffffff !important;
+    line-height: 1.7;
+    font-size: 16px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.article-content-full * {
+    color: #ffffff !important;
+}
+
+.article-content-full p {
+    margin-bottom: 1.25rem;
+    font-size: 16px;
+    color: #ffffff !important;
+    font-weight: 400;
+}
+
+.article-content-full h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #ffffff !important;
+}
+
+.article-content-full h2 span {
+    color: #dc2626 !important;
+}
+
+.article-content-full h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: #ffffff !important;
+}
+
+.article-content-full strong {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.article-content-full em {
+    color: #ffffff !important;
+    font-style: italic;
+}
+
+.article-content-full ul,
+.article-content-full ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    color: #ffffff !important;
+}
+
+.article-content-full li {
+    margin-bottom: 0.5rem;
+    color: #ffffff !important;
+}
+
+.article-content-full img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+.article-content-full a {
+    color: #dc2626 !important;
+    text-decoration: underline;
+}
+
+.article-content-full a:hover {
+    color: #ef4444 !important;
+}
+</style>
+{% endblock %}
