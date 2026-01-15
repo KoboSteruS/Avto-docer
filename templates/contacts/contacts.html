@@ -103,6 +103,42 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Social Networks -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-red-700/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-white mb-3">Мы в соцсетях</div>
+                            <div class="flex items-center gap-3">
+                                <!-- Telegram -->
+                                <a
+                                    href="https://t.me/avtodecorptz"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex items-center justify-center w-12 h-12 bg-red-700 hover:bg-red-800 transition-colors rounded-lg"
+                                    aria-label="Telegram"
+                                >
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                    </svg>
+                                </a>
+                                <!-- VK -->
+                                <a
+                                    href="https://vk.ru/avto_decor"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex items-center justify-center w-12 h-12 bg-red-700 hover:bg-red-800 transition-colors rounded-lg text-white font-bold"
+                                    aria-label="ВКонтакте"
+                                >
+                                    ВК
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -234,8 +270,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Координаты: г. Петрозаводск, Гвардейская ул., 10
-        // Примерные координаты для Петрозаводска, ул. Гвардейская
-        var coordinates = [61.7850, 34.3469]; // Петрозаводск, центр города
+        var coordinates = [61.754844, 34.431505]; // Точные координаты студии
         
         // Инициализация карты
         ymaps.ready(function() {
@@ -247,43 +282,27 @@
                 searchControlProvider: 'yandex#search'
             });
 
-            // Геокодирование адреса для точных координат
-            ymaps.geocode('Петрозаводск, Гвардейская ул., 10').then(function(res) {
-                var firstGeoObject = res.geoObjects.get(0);
-                if (firstGeoObject) {
-                    var coords = firstGeoObject.geometry.getCoordinates();
-                    myMap.setCenter(coords, 16);
-                    
-                    // Добавляем метку с кастомным цветом
-                    var myPlacemark = new ymaps.Placemark(coords, {
-                        balloonContentHeader: '<strong style="color: #dc2626;">Avto-Декор</strong>',
-                        balloonContentBody: '<div style="color: #333;">г. Петрозаводск, Гвардейская ул., 10<br>Телефон: <a href="tel:88142282380" style="color: #dc2626;">8(8142) 28-23-80</a></div>',
-                        balloonContentFooter: '<div style="color: #666; font-size: 12px;">Студия автомобильного интерьера</div>',
-                        hintContent: 'Avto-Декор'
-                    }, {
-                        // Используем стандартный маркер с кастомным цветом
-                        preset: 'islands#redIcon'
-                    });
-                    
-                    myMap.geoObjects.add(myPlacemark);
-                    
-                    // Открываем балун при клике
-                    myPlacemark.events.add('click', function() {
-                        myPlacemark.balloon.open();
-                    });
-                } else {
-                    // Если геокодирование не удалось, используем примерные координаты
-                    var myPlacemark = new ymaps.Placemark(coordinates, {
-                        balloonContentHeader: '<strong style="color: #dc2626;">Avto-Декор</strong>',
-                        balloonContentBody: '<div style="color: #333;">г. Петрозаводск, Гвардейская ул., 10<br>Телефон: <a href="tel:88142282380" style="color: #dc2626;">8(8142) 28-23-80</a></div>',
-                        balloonContentFooter: '<div style="color: #666; font-size: 12px;">Студия автомобильного интерьера</div>',
-                        hintContent: 'Avto-Декор'
-                    }, {
-                        preset: 'islands#redIcon'
-                    });
-                    
-                    myMap.geoObjects.add(myPlacemark);
-                }
+            // Добавляем метку с точными координатами и названием компании
+            var myPlacemark = new ymaps.Placemark(coordinates, {
+                balloonContentHeader: '<strong style="color: #dc2626; font-size: 18px;">Avto-Декор</strong>',
+                balloonContentBody: '<div style="color: #333; font-size: 14px; line-height: 1.6;">' +
+                    '<p style="margin: 0 0 8px 0;"><strong>Тюнинг-ателье Студия детейлинга</strong></p>' +
+                    '<p style="margin: 0 0 8px 0;">📍 г. Петрозаводск, Гвардейская ул., 10</p>' +
+                    '<p style="margin: 0 0 8px 0;">📞 Телефон: <a href="tel:88142282380" style="color: #dc2626; text-decoration: none;">8(8142) 28-23-80</a></p>' +
+                    '<p style="margin: 0;"><a href="https://yandex.com/maps/-/CLhaIMYH" target="_blank" style="color: #dc2626; text-decoration: none;">📍 Открыть в Яндекс.Картах</a></p>' +
+                    '</div>',
+                balloonContentFooter: '',
+                hintContent: 'Avto-Декор — Тюнинг-ателье Студия детейлинга'
+            }, {
+                preset: 'islands#redIcon',
+                iconCaption: 'Avto-Декор'
+            });
+            
+            myMap.geoObjects.add(myPlacemark);
+            
+            // Открываем балун при клике
+            myPlacemark.events.add('click', function() {
+                myPlacemark.balloon.open();
             });
         });
     });

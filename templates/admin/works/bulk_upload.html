@@ -1,0 +1,220 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Массовая загрузка фотографий работ | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Главная</a>
+    &rsaquo; <a href="{% url 'admin:works_work_changelist' %}">Работы</a>
+    &rsaquo; Массовая загрузка
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <h1>Массовая загрузка фотографий работ</h1>
+    
+    <div class="module" style="max-width: 800px; margin-top: 20px;">
+        <div class="form-row" style="background: #1f2937; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626; margin-bottom: 20px;">
+            <p style="color: #ffffff; margin: 0 0 10px 0; font-size: 14px; line-height: 1.6;">
+                <strong style="color: #dc2626;">📸 Как использовать:</strong>
+            </p>
+            <ul style="color: #ffffff; margin: 0; padding-left: 20px; line-height: 1.8; font-size: 14px;">
+                <li>Выберите категорию, к которой будут относиться все загружаемые фотографии</li>
+                <li>Нажмите на поле "Фотографии" и выберите несколько файлов (удерживайте <strong>Ctrl</strong> на Windows или <strong>Cmd</strong> на Mac)</li>
+                <li>Можно загрузить до 100 фотографий за раз</li>
+                <li>Поддерживаются форматы: JPG, PNG, GIF, WebP</li>
+                <li>Максимальный размер одного файла: 10 МБ</li>
+            </ul>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" id="bulk-upload-form">
+            {% csrf_token %}
+            
+            <fieldset class="module aligned">
+                <h2>Параметры загрузки</h2>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="{{ form.category.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 600; color: #ffffff;">
+                            {{ form.category.label }}
+                            <span style="color: #dc2626;">*</span>
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.help_text %}
+                        <p class="help" style="margin-top: 5px; color: #9ca3af; font-size: 12px;">
+                            {{ form.category.help_text }}
+                        </p>
+                        {% endif %}
+                        {% if form.category.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.category.errors %}
+                            <li style="color: #dc2626;">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="{{ form.images.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 600; color: #ffffff;">
+                            {{ form.images.label }}
+                            <span style="color: #dc2626;">*</span>
+                        </label>
+                        <input 
+                            type="file" 
+                            name="images" 
+                            id="id_images" 
+                            multiple 
+                            accept="image/*"
+                            required
+                            style="width: 100%; padding: 10px; font-size: 14px; background: #374151; border: 1px solid #4b5563; border-radius: 4px; color: #ffffff; cursor: pointer;"
+                            onchange="updateFileCount(this)"
+                        />
+                        <p id="file-count" style="margin-top: 8px; color: #9ca3af; font-size: 13px; font-weight: 500;"></p>
+                        {% if form.images.help_text %}
+                        <p class="help" style="margin-top: 5px; color: #9ca3af; font-size: 12px;">
+                            {{ form.images.help_text }}
+                        </p>
+                        {% endif %}
+                        {% if form.images.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.images.errors %}
+                            <li style="color: #dc2626;">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="{{ form.is_active.id_for_label }}" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #ffffff;">
+                            {{ form.is_active }}
+                            <span style="font-weight: 600;">{{ form.is_active.label }}</span>
+                        </label>
+                        {% if form.is_active.help_text %}
+                        <p class="help" style="margin-top: 5px; color: #9ca3af; font-size: 12px;">
+                            {{ form.is_active.help_text }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="{{ form.order.id_for_label }}" style="display: block; margin-bottom: 8px; font-weight: 600; color: #ffffff;">
+                            {{ form.order.label }}
+                        </label>
+                        {{ form.order }}
+                        {% if form.order.help_text %}
+                        <p class="help" style="margin-top: 5px; color: #9ca3af; font-size: 12px;">
+                            {{ form.order.help_text }}
+                        </p>
+                        {% endif %}
+                        {% if form.order.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.order.errors %}
+                            <li style="color: #dc2626;">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+            
+            <div class="submit-row" style="margin-top: 30px;">
+                <input type="submit" value="Загрузить фотографии" class="default" style="background: #dc2626; color: #ffffff; padding: 10px 20px; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#991b1b'" onmouseout="this.style.background='#dc2626'"/>
+                <a href="{% url 'admin:works_work_changelist' %}" class="button" style="background: #374151; color: #ffffff; padding: 10px 20px; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; margin-left: 10px;">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateFileCount(input) {
+    const fileCount = input.files.length;
+    const fileCountElement = document.getElementById('file-count');
+    
+    if (fileCount > 0) {
+        const totalSize = Array.from(input.files).reduce((sum, file) => sum + file.size, 0);
+        const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+        
+        fileCountElement.textContent = `Выбрано файлов: ${fileCount} (общий размер: ${totalSizeMB} МБ)`;
+        fileCountElement.style.color = '#10b981';
+        
+        if (fileCount > 100) {
+            fileCountElement.textContent += ' ⚠️ Слишком много файлов! Рекомендуется загружать не более 100 за раз.';
+            fileCountElement.style.color = '#f59e0b';
+        }
+    } else {
+        fileCountElement.textContent = '';
+    }
+}
+
+// Предотвращаем отправку формы, если файлов слишком много
+document.getElementById('bulk-upload-form').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('id_images');
+    if (fileInput.files.length > 100) {
+        e.preventDefault();
+        alert('Слишком много файлов! Пожалуйста, выберите не более 100 файлов за раз.');
+        return false;
+    }
+});
+</script>
+
+<style>
+.form-row {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #1f2937;
+    border-radius: 6px;
+}
+
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+.form-row input[type="text"]:focus,
+.form-row input[type="number"]:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #dc2626;
+}
+
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+}
+
+.errorlist li {
+    padding: 5px 0;
+    font-size: 13px;
+}
+
+.help {
+    margin-top: 5px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+</style>
+{% endblock %}
