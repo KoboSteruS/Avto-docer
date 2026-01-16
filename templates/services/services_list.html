@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-20">
-    <h1 class="text-5xl text-center mb-6 text-white">
+    <h1 class="text-3xl sm:text-4xl md:text-5xl text-center mb-4 sm:mb-6 text-white break-words">
         {% get_content 'services' 'title' 'Наши <span class="text-red-700">Услуги</span>' %}
     </h1>
     <p class="text-xl text-center text-gray-400 mb-16 max-w-3xl mx-auto">
@@ -21,18 +21,18 @@
                 <img 
                     src="{% static 'img/Logo.png' %}?v=2" 
                     alt="Avto-Декор" 
-                    class="h-32 md:h-40 w-auto"
-                    style="filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
+                    class="h-20 sm:h-24 md:h-28"
+                    style="max-width: 100px; width: auto; height: auto; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
                 />
             </div>
             
             <!-- Контент -->
-            <div class="relative p-8 z-10">
-                <div class="flex items-start gap-6">
-                    <div class="flex-shrink-0 self-stretch">
-                        <div class="h-full bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30" style="min-height: 200px; width: 200px;">
+            <div class="relative p-4 sm:p-6 md:p-8 z-10">
+                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <div class="flex-shrink-0 w-full sm:w-auto">
+                        <div class="bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30" style="min-height: 150px; width: 100%; max-width: 200px; height: 150px;">
                             {% if service.image %}
-                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-full h-full object-cover rounded" style="min-height: 200px;">
+                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-full h-full object-cover rounded" style="min-height: 150px;">
                             {% else %}
                             <svg class="w-16 h-16 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -41,8 +41,8 @@
                         </div>
                     </div>
                     
-                    <div class="flex-1">
-                        <h2 class="text-2xl mb-3 text-white">
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-xl sm:text-2xl mb-3 text-white break-words">
                             <a href="/uslugi/{{ service.slug }}/" class="hover:text-red-700 transition-colors">
                                 {{ service.title }}
                             </a>
@@ -75,14 +75,14 @@
     </div>
 
     <!-- CTA -->
-    <div class="mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-3xl mb-4 text-white">{% get_content 'services' 'cta_title' 'Нужна консультация?' %}</h2>
-        <p class="text-gray-300 mb-6">
+    <div class="mt-8 sm:mt-12 md:mt-16 bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-6 sm:p-8 md:p-12 text-center border border-red-700/50">
+        <h2 class="text-2xl sm:text-3xl mb-4 text-white break-words">{% get_content 'services' 'cta_title' 'Нужна консультация?' %}</h2>
+        <p class="text-gray-300 mb-6 text-sm sm:text-base break-words">
             {% get_content 'services' 'cta_text' 'Свяжитесь с нами для подробной консультации и расчета стоимости услуг' %}
         </p>
         <a
             href="tel:+79212282301"
-            class="inline-block bg-red-700 hover:bg-red-800 transition-colors px-8 py-4 rounded-lg text-lg"
+            class="inline-block bg-red-700 hover:bg-red-800 transition-colors px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg break-words"
         >
             +7 (921) 228-23-01
         </a>

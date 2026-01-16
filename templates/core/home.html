@@ -54,7 +54,7 @@
 
 <!-- Services Preview -->
 <section class="container mx-auto px-4 py-20">
-    <h2 class="text-4xl text-center mb-12 text-white">
+    <h2 class="text-3xl sm:text-4xl text-center mb-8 sm:mb-12 text-white break-words">
         Наши <span class="text-red-700">Услуги</span>
     </h2>
     
@@ -110,16 +110,16 @@
             {% static 'img/salon_small.jpg' as service_bg_image %}
         {% endif %}
         
-        <a href="{% url 'services:detail' slug=service.slug %}" class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block">
+        <a href="{% url 'services:detail' slug=service.slug %}" class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block max-w-full">
             <!-- Фоновое изображение -->
             <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-500" style="background-image: url('{{ service_bg_image }}');"></div>
             <div class="absolute inset-0 bg-gradient-to-br from-gray-900/75 via-gray-900/70 to-gray-800/75"></div>
             
             <!-- Контент -->
-            <div class="relative h-48 flex items-center justify-center p-6">
-                <div class="text-center">
-                    <h3 class="text-xl mb-2 text-white font-semibold">{{ service.title }}</h3>
-                    <p class="text-gray-300 text-sm">{{ service.short_description|default:service.description|truncatewords:12 }}</p>
+            <div class="relative h-48 flex items-center justify-center p-4 sm:p-6">
+                <div class="text-center max-w-full">
+                    <h3 class="text-lg sm:text-xl mb-2 text-white font-semibold break-words">{{ service.title }}</h3>
+                    <p class="text-gray-300 text-xs sm:text-sm break-words">{{ service.short_description|default:service.description|truncatewords:12 }}</p>
                 </div>
             </div>
         </a>
@@ -130,13 +130,13 @@
         {% endfor %}
     </div>
 
-    <div class="text-center mt-12">
+    <div class="text-center mt-8 sm:mt-12">
         <a
             href="{% url 'services:list' %}"
-            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-6 py-3 rounded-lg"
+            class="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 transition-colors px-5 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base break-words"
         >
             Все Услуги
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </a>
@@ -146,7 +146,7 @@
 <!-- About Company -->
 <section class="container mx-auto px-4 py-20">
     <div class="max-w-6xl mx-auto">
-        <h2 class="text-4xl text-center mb-6 text-white">
+        <h2 class="text-3xl sm:text-4xl text-center mb-4 sm:mb-6 text-white break-words">
             {% get_content 'home' 'about_subtitle' '🚗 Детейлинг в <span class="text-red-700">Авто-Декор</span>' %}
         </h2>
         <p class="text-xl text-center text-gray-300 mb-4 max-w-3xl mx-auto">
@@ -285,13 +285,22 @@
 <!-- Works Preview -->
 {% if works %}
 <section class="container mx-auto px-4 py-20">
-    <h2 class="text-4xl text-center mb-12 text-white">
+    <h2 class="text-3xl sm:text-4xl text-center mb-8 sm:mb-12 text-white break-words">
         Наши <span class="text-red-700">Работы</span>
     </h2>
     
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mx-auto" id="works-carousel" style="width: 90%; max-width: 1200px;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mx-auto w-full max-w-full" id="works-carousel">
         <style>
+            #works-carousel {
+                width: 100% !important;
+                max-width: 1200px !important;
+            }
             @media (min-width: 768px) {
+                #works-carousel {
+                    width: 90% !important;
+                }
+            }
+            @media (min-width: 1024px) {
                 #works-carousel {
                     width: 70% !important;
                 }
@@ -413,12 +422,12 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endif %}
 
 <!-- Materials Section -->
-<section class="container mx-auto px-4 py-20">
+<section class="container mx-auto px-4 py-12 sm:py-16 md:py-20">
     <div class="max-w-4xl mx-auto">
-        <h2 class="text-4xl text-center mb-6 text-white">
+        <h2 class="text-3xl sm:text-4xl text-center mb-4 sm:mb-6 text-white break-words">
             Премиум <span class="text-red-700">материалы</span>
         </h2>
-        <p class="text-xl text-center text-gray-300 mb-12 max-w-3xl mx-auto">
+        <p class="text-base sm:text-lg md:text-xl text-center text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto break-words">
             Работаем с лучшими материалами для создания неповторимого образа
         </p>
         <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -443,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- CTA Section -->
 <section class="container mx-auto px-4 py-20">
     <div class="bg-gradient-to-r from-red-900/30 to-red-700/30 rounded-2xl p-12 text-center border border-red-700/50">
-        <h2 class="text-4xl mb-4 text-white">Готовы преобразить свой автомобиль?</h2>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl mb-4 text-white break-words">Готовы преобразить свой автомобиль?</h2>
         <p class="text-xl text-gray-300 mb-2">
             Каждый проект — это история о вкусе и внимании к деталям.
         </p>
