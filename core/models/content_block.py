@@ -4,6 +4,7 @@
 from django.db import models
 from django.utils.html import format_html
 from django.core.cache import cache
+from django.utils.text import slugify
 from .base import BaseModel
 
 
@@ -36,7 +37,8 @@ class ContentBlock(BaseModel):
     block_key = models.CharField(
         max_length=100,
         verbose_name='Ключ блока',
-        help_text='Уникальный ключ блока на странице (например: hero_title, about_text)'
+        help_text='Уникальный ключ блока на странице (генерируется автоматически из описания)',
+        db_index=True
     )
     content = models.TextField(
         verbose_name='Содержимое',
@@ -51,7 +53,7 @@ class ContentBlock(BaseModel):
         max_length=255,
         blank=True,
         verbose_name='Описание',
-        help_text='Краткое описание блока для удобства в админке (необязательно)'
+        help_text='Краткое описание блока для удобства в админке. Ключ блока сгенерируется автоматически из описания.'
     )
 
     class Meta:
@@ -65,8 +67,9 @@ class ContentBlock(BaseModel):
 
     def __str__(self) -> str:
         """Строковое представление"""
-        desc = f' - {self.description}' if self.description else ''
-        return f'{self.get_page_display()}: {self.block_key}{desc}'
+        if self.description:
+            return f'{self.get_page_display()}: {self.description}'
+        return f'{self.get_page_display()}: {self.block_key}'
     
     def get_preview(self) -> str:
         """Получить превью содержимого для админки"""
@@ -76,10 +79,19 @@ class ContentBlock(BaseModel):
         return format_html('<span style="color: #666;">{}</span>', preview)
     
     def save(self, *args, **kwargs):
-        """Переопределяем save для очистки кэша при сохранении"""
+        """Переопределяем save для автогенерации ключа и очистки кэша"""
+        # Автогенерация ключа из описания, если не указан
+        if not self.block_key and self.description:
+            self.block_key = slugify(self.description)
+            # Ограничиваем длину
+            if len(self.block_key) > 100:
+                self.block_key = self.block_key[:100]
+        
         # Очищаем кэш для этого блока
-        cache_key = f'content_block:{self.page}:{self.block_key}'
-        cache.delete(cache_key)
+        if self.block_key:
+            cache_key = f'content_block:{self.page}:{self.block_key}'
+            cache.delete(cache_key)
+        
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):
