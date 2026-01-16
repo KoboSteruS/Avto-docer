@@ -1,6 +1,7 @@
 """
 Форма для заявки с контактной страницы
 """
+import re
 from django import forms
 
 
@@ -59,6 +60,7 @@ class ContactForm(forms.Form):
     def clean_name(self):
         """
         Валидация имени
+        Запрещает ссылки и подозрительные символы
         """
         name = self.cleaned_data.get('name')
         if name:
@@ -67,6 +69,20 @@ class ContactForm(forms.Form):
                 raise forms.ValidationError('Имя должно содержать минимум 2 символа')
             if len(name) > 100:
                 raise forms.ValidationError('Имя не должно превышать 100 символов')
+            
+            # Проверка на наличие ссылок в имени
+            url_patterns = [
+                r'https?://',
+                r'www\.',
+                r'[a-zA-Z0-9-]+\.[a-zA-Z]{2,}',
+                r'<a\s+href',
+                r'href\s*=',
+            ]
+            
+            for pattern in url_patterns:
+                if re.search(pattern, name, re.IGNORECASE):
+                    raise forms.ValidationError('Имя не должно содержать ссылки')
+        
         return name
     
     def clean_phone(self):
@@ -85,6 +101,7 @@ class ContactForm(forms.Form):
     def clean_message(self):
         """
         Валидация сообщения
+        Запрещает ссылки и HTML-теги
         """
         message = self.cleaned_data.get('message')
         if message:
@@ -93,4 +110,26 @@ class ContactForm(forms.Form):
                 raise forms.ValidationError('Сообщение должно содержать минимум 10 символов')
             if len(message) > 1000:
                 raise forms.ValidationError('Сообщение не должно превышать 1000 символов')
+            
+            # Проверка на наличие ссылок (http, https, www, .com, .ru и т.д.)
+            url_patterns = [
+                r'https?://',  # http:// или https://
+                r'www\.',      # www.
+                r'[a-zA-Z0-9-]+\.[a-zA-Z]{2,}',  # домены типа example.com, site.ru
+                r'<a\s+href',  # HTML-теги ссылок
+                r'href\s*=',   # атрибут href
+            ]
+            
+            for pattern in url_patterns:
+                if re.search(pattern, message, re.IGNORECASE):
+                    raise forms.ValidationError(
+                        'В сообщении запрещены ссылки. Пожалуйста, опишите ваш вопрос без ссылок.'
+                    )
+            
+            # Проверка на HTML-теги
+            if re.search(r'<[^>]+>', message):
+                raise forms.ValidationError(
+                    'В сообщении запрещены HTML-теги. Пожалуйста, используйте только обычный текст.'
+                )
+        
         return message

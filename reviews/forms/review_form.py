@@ -1,6 +1,7 @@
 """
 Форма для добавления отзыва
 """
+import re
 from django import forms
 from reviews.models import Review
 
@@ -57,6 +58,7 @@ class ReviewForm(forms.ModelForm):
     def clean_text(self):
         """
         Валидация текста отзыва
+        Запрещает ссылки и HTML-теги
         """
         text = self.cleaned_data.get('text')
         if text:
@@ -65,6 +67,28 @@ class ReviewForm(forms.ModelForm):
                 raise forms.ValidationError('Текст отзыва должен содержать минимум 10 символов')
             if len(text) > 1000:
                 raise forms.ValidationError('Текст отзыва не должен превышать 1000 символов')
+            
+            # Проверка на наличие ссылок (http, https, www, .com, .ru и т.д.)
+            url_patterns = [
+                r'https?://',  # http:// или https://
+                r'www\.',      # www.
+                r'[a-zA-Z0-9-]+\.[a-zA-Z]{2,}',  # домены типа example.com, site.ru
+                r'<a\s+href',  # HTML-теги ссылок
+                r'href\s*=',   # атрибут href
+            ]
+            
+            for pattern in url_patterns:
+                if re.search(pattern, text, re.IGNORECASE):
+                    raise forms.ValidationError(
+                        'В тексте отзыва запрещены ссылки. Пожалуйста, опишите ваши впечатления без ссылок.'
+                    )
+            
+            # Проверка на HTML-теги
+            if re.search(r'<[^>]+>', text):
+                raise forms.ValidationError(
+                    'В тексте отзыва запрещены HTML-теги. Пожалуйста, используйте только обычный текст.'
+                )
+        
         return text
 
     def clean_name(self):
