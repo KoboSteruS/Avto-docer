@@ -6,16 +6,16 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative h-[400px] flex items-center justify-center overflow-hidden">
+<section class="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex items-center justify-center overflow-hidden">
     {% if service.image %}
     <div 
         class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-        style="background-image: url('{{ service.image.url }}')"
+        style="background-image: url('{{ service.image.url }}'); background-size: cover; background-position: center; background-attachment: scroll;"
     ></div>
     {% else %}
     <div 
         class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-        style="background-image: url('https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjcyNjQ0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')"
+        style="background-image: url('https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjcyNjQ0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'); background-size: cover; background-position: center; background-attachment: scroll;"
     ></div>
     {% endif %}
     <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80"></div>

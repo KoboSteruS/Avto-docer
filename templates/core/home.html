@@ -112,7 +112,7 @@
         
         <a href="{% url 'services:detail' slug=service.slug %}" class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block max-w-full">
             <!-- Фоновое изображение -->
-            <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-500" style="background-image: url('{{ service_bg_image }}');"></div>
+            <div class="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-60 transition-opacity duration-500" style="background-image: url('{{ service_bg_image }}'); background-size: cover; background-position: center; background-attachment: scroll;"></div>
             <div class="absolute inset-0 bg-gradient-to-br from-gray-900/75 via-gray-900/70 to-gray-800/75"></div>
             
             <!-- Контент -->

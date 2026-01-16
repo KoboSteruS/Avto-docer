@@ -49,6 +49,21 @@
             height: auto !important;
         }
         
+        /* Адаптивность фоновых изображений */
+        [style*="background-image"] {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+        
+        /* Исправление для карточек услуг */
+        .group.relative.overflow-hidden img,
+        .group.relative.overflow-hidden [style*="background-image"] {
+            max-width: 100% !important;
+            width: 100% !important;
+            object-fit: cover !important;
+        }
+        
         /* Исключение для логотипов - они не должны растягиваться */
         img[alt="Avto-Декор"], img[alt*="Avto"], header img, footer img {
             max-width: none !important;
