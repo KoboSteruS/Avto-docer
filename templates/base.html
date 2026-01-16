@@ -30,6 +30,25 @@
         body {
             background: linear-gradient(to bottom right, #111827, #000000, #111827);
         }
+        
+        /* Ограничение максимальной ширины контейнера для лучшей читаемости */
+        .container {
+            max-width: 1400px !important;
+        }
+        
+        /* Адаптивность для средних экранов (около 1478px) */
+        @media (min-width: 1280px) and (max-width: 1536px) {
+            .container {
+                max-width: 1280px !important;
+            }
+        }
+        
+        /* Улучшение навигации на средних экранах */
+        @media (min-width: 1024px) and (max-width: 1400px) {
+            nav ul li {
+                font-size: 0.875rem;
+            }
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
