@@ -59,16 +59,9 @@
                 padding-bottom: 3rem !important;
             }
             
-            /* Уменьшаем высоту hero-секции для средних экранов */
-            section.relative.h-\[450px\] {
-                height: 450px !important;
-            }
-        }
-        
-        /* Специально для экранов около 1478px */
-        @media (min-width: 1400px) and (max-width: 1500px) {
-            section.relative {
-                height: 480px !important;
+            /* Hero-секция с автоматической высотой */
+            section.relative.min-h-\[400px\] {
+                min-height: 400px !important;
             }
         }
         
@@ -378,6 +371,7 @@
                     <h3 class="text-white mb-4">Режим работы</h3>
                     <p class="text-gray-400 text-sm">Понедельник - Пятница: 10:00 - 18:30</p>
                     <p class="text-gray-400 text-sm">Суббота: 12:00 - 17:00</p>
+                    <p class="text-gray-400 text-sm">Воскресенье: 12:00 - 17:00</p>
                 </div>
             </div>
             <div class="border-t border-red-900/20 mt-8 pt-8 text-center text-gray-500 text-sm">
