@@ -36,12 +36,24 @@
             max-width: 1200px !important;
         }
         
+        /* Header должен быть шире основного контента */
+        header .container {
+            max-width: 1400px !important;
+        }
+        
         /* Адаптивность для средних экранов (около 1478px) */
         @media (min-width: 1200px) and (max-width: 1600px) {
             .container {
                 max-width: 1100px !important;
                 padding-left: 1.5rem !important;
                 padding-right: 1.5rem !important;
+            }
+            
+            /* Header должен быть шире */
+            header .container {
+                max-width: 1400px !important;
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
             }
             
             /* Уменьшаем размеры шрифтов */
@@ -375,7 +387,7 @@
                 </div>
             </div>
             <div class="border-t border-red-900/20 mt-8 pt-8 text-center text-gray-500 text-sm">
-                <p>© 2026 Avto-Декор. Все права защищены.</p>
+                <p>© 2012-2026 Avto-Декор. Все права защищены.</p>
                 <p class="mt-2">Сайт разработан компанией <a href="https://atii.ru" target="_blank" rel="noopener noreferrer" class="text-red-700 hover:text-red-600 transition-colors">АТИИ</a></p>
             </div>
         </div>
