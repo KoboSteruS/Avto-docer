@@ -33,20 +33,57 @@
         
         /* Ограничение максимальной ширины контейнера для лучшей читаемости */
         .container {
-            max-width: 1400px !important;
+            max-width: 1200px !important;
         }
         
         /* Адаптивность для средних экранов (около 1478px) */
-        @media (min-width: 1280px) and (max-width: 1536px) {
+        @media (min-width: 1200px) and (max-width: 1600px) {
             .container {
-                max-width: 1280px !important;
+                max-width: 1100px !important;
+                padding-left: 1.5rem !important;
+                padding-right: 1.5rem !important;
+            }
+            
+            /* Уменьшаем размеры шрифтов */
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            h2 {
+                font-size: 2rem !important;
+            }
+            
+            /* Уменьшаем отступы */
+            section {
+                padding-top: 3rem !important;
+                padding-bottom: 3rem !important;
+            }
+            
+            /* Уменьшаем высоту hero-секции для средних экранов */
+            section.relative.h-\[450px\] {
+                height: 450px !important;
+            }
+        }
+        
+        /* Специально для экранов около 1478px */
+        @media (min-width: 1400px) and (max-width: 1500px) {
+            section.relative {
+                height: 480px !important;
             }
         }
         
         /* Улучшение навигации на средних экранах */
-        @media (min-width: 1024px) and (max-width: 1400px) {
-            nav ul li {
-                font-size: 0.875rem;
+        @media (min-width: 1024px) and (max-width: 1600px) {
+            nav ul li a {
+                font-size: 0.7rem !important;
+                padding: 0.75rem 0.25rem !important;
+            }
+        }
+        
+        /* Ограничение ширины для больших секций */
+        @media (min-width: 1280px) {
+            section.container {
+                max-width: 1100px !important;
             }
         }
     </style>
