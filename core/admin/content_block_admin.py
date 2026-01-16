@@ -173,6 +173,25 @@ class ContentBlockAdmin(admin.ModelAdmin):
                 obj.block_key = obj.block_key[:100]
         super().save_model(request, obj, form, change)
     
+    def sync_blocks_from_templates(self, request, queryset):
+        """Админ-действие для синхронизации блоков из шаблонов"""
+        from django.core.management import call_command
+        from io import StringIO
+        
+        output = StringIO()
+        call_command('sync_content_blocks', stdout=output)
+        output.seek(0)
+        result = output.read()
+        
+        self.message_user(
+            request,
+            f'Синхронизация завершена. Результат:\n{result}',
+            level='success'
+        )
+    sync_blocks_from_templates.short_description = 'Синхронизировать блоки из шаблонов'
+    
+    actions = [sync_blocks_from_templates]
+    
     def get_queryset(self, request):
         """Оптимизация запросов"""
         return super().get_queryset(request).select_related()
