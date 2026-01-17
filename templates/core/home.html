@@ -111,15 +111,13 @@
         {% endif %}
         
         <a href="{% url 'services:detail' slug=service.slug %}" class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 block max-w-full bg-black">
-            <!-- Логотип справа снизу -->
-            <div class="absolute bottom-4 right-4 opacity-25 z-0">
-                <img 
-                    src="{% static 'img/Logo.png' %}?v=2" 
-                    alt="Avto-Декор" 
-                    class="h-20 sm:h-24 md:h-28"
-                    style="max-width: 100px; width: auto; height: auto; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
-                />
-            </div>
+            <!-- Фоновое изображение (затемненное) или черный фон -->
+            {% if service.image %}
+            <div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition-opacity" style="background-image: url('{{ service.image.url }}');"></div>
+            {% endif %}
+            
+            <!-- Затемняющий overlay -->
+            <div class="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors"></div>
             
             <!-- Контент -->
             <div class="relative h-48 flex items-center justify-center p-4 sm:p-6 z-10">
@@ -289,52 +287,29 @@
 </section>
 
 <!-- Works Preview -->
-{% if works %}
+{% if work_categories %}
 <section class="container mx-auto px-4 py-20">
     <h2 class="text-3xl sm:text-4xl text-center mb-8 sm:mb-12 text-white break-words">
         Наши <span class="text-red-700">Работы</span>
     </h2>
     
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mx-auto w-full max-w-full" id="works-carousel">
-        <style>
-            #works-carousel {
-                width: 100% !important;
-                max-width: 1200px !important;
-            }
-            @media (min-width: 768px) {
-                #works-carousel {
-                    width: 90% !important;
-                }
-            }
-            @media (min-width: 1024px) {
-                #works-carousel {
-                    width: 70% !important;
-                }
-            }
-        </style>
-        <!-- Первые 6 работ отображаются сразу -->
-        {% for work in works|slice:":6" %}
-        <div class="work-item group relative overflow-hidden rounded-xl border-2 border-gray-800 hover:border-red-700 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 aspect-square">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mx-auto w-full max-w-full">
+        {% for category in work_categories %}
+        {% if category.first_work %}
+        <a href="{% url 'works:category' slug=category.slug %}" class="group relative overflow-hidden rounded-xl border-2 border-gray-800 hover:border-red-700 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 aspect-square block">
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-            <!-- Основное изображение -->
+            <!-- Изображение первой работы категории -->
             <img
-                src="{{ work.image.url }}"
-                alt="Работа {{ forloop.counter }}"
-                class="work-image-main w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                data-work-index="{{ forloop.counter0 }}"
-                loading="lazy"
-            />
-            <!-- Изображение для crossfade -->
-            <img
-                src="{{ work.image.url }}"
-                alt="Работа {{ forloop.counter }}"
-                class="work-image-overlay w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out absolute inset-0 opacity-0"
+                src="{{ category.first_work.image.url }}"
+                alt="{{ category.name }}"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                 loading="lazy"
             />
             <div class="absolute bottom-0 left-0 right-0 p-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p class="text-white text-sm font-medium truncate">Наша работа</p>
+                <p class="text-white text-sm font-medium truncate">{{ category.name }}</p>
             </div>
-        </div>
+        </a>
+        {% endif %}
         {% endfor %}
     </div>
 
@@ -350,81 +325,6 @@
         </a>
     </div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const worksData = [
-        {% for work in works %}
-        {
-            image: "{{ work.image.url }}",
-            index: {{ forloop.counter0 }}
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ];
-    
-    if (worksData.length < 6) return; // Нужно минимум 6 работ
-    
-    const carousel = document.getElementById('works-carousel');
-    const workItems = carousel.querySelectorAll('.work-item');
-    let currentIndices = [0, 1, 2, 3, 4, 5]; // Индексы текущих отображаемых работ
-    
-    function getRandomWorkIndex() {
-        // Получаем случайный индекс из всех доступных работ
-        // Если работ больше 6, стараемся не повторять текущие
-        if (worksData.length > 6) {
-            const availableIndices = worksData
-                .map((_, idx) => idx)
-                .filter(idx => !currentIndices.includes(idx));
-            
-            if (availableIndices.length > 0) {
-                return availableIndices[Math.floor(Math.random() * availableIndices.length)];
-            }
-        }
-        // Если работ <= 6 или все уже используются, возвращаем любой случайный
-        return Math.floor(Math.random() * worksData.length);
-    }
-    
-    function rotateWork() {
-        // Случайно выбираем позицию для замены (хаотично)
-        const randomPosition = Math.floor(Math.random() * 6);
-        const itemToChange = workItems[randomPosition];
-        const imgMain = itemToChange.querySelector('.work-image-main');
-        const imgOverlay = itemToChange.querySelector('.work-image-overlay');
-        
-        // Получаем случайный индекс (все фотки могут переливаться)
-        const newIndex = getRandomWorkIndex();
-        
-        // Обновляем текущий индекс
-        currentIndices[randomPosition] = newIndex;
-        
-        // Crossfade эффект: загружаем новое изображение в overlay
-        imgOverlay.src = worksData[newIndex].image;
-        imgOverlay.alt = 'Работа ' + (newIndex + 1);
-        imgOverlay.setAttribute('data-work-index', newIndex);
-        
-        // Показываем overlay (новое изображение), скрываем main (старое)
-        imgOverlay.style.opacity = '1';
-        imgOverlay.style.transition = 'opacity 0.5s ease-in-out';
-        imgMain.style.opacity = '0';
-        imgMain.style.transition = 'opacity 0.5s ease-in-out';
-        
-        // После завершения перехода, меняем местами
-        setTimeout(() => {
-            // Меняем src основного изображения
-            imgMain.src = worksData[newIndex].image;
-            imgMain.alt = 'Работа ' + (newIndex + 1);
-            imgMain.setAttribute('data-work-index', newIndex);
-            
-            // Сбрасываем opacity
-            imgMain.style.opacity = '1';
-            imgOverlay.style.opacity = '0';
-        }, 500);
-    }
-    
-    // Запускаем ротацию каждые 1.2 секунды (быстро, но с плавным переходом)
-    setInterval(rotateWork, 1200);
-});
-</script>
 {% endif %}
 
 <!-- Materials Section -->

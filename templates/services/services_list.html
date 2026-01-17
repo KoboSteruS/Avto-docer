@@ -24,16 +24,6 @@
             <!-- Затемняющий overlay -->
             <div class="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors"></div>
             
-            <!-- Логотип справа снизу -->
-            <div class="absolute bottom-4 right-4 opacity-25 z-0">
-                <img 
-                    src="{% static 'img/Logo.png' %}?v=2" 
-                    alt="Avto-Декор" 
-                    class="h-20 sm:h-24 md:h-28"
-                    style="max-width: 100px; width: auto; height: auto; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
-                />
-            </div>
-            
             <!-- Контент -->
             <div class="relative p-4 sm:p-6 md:p-8 z-10">
                 <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
@@ -48,15 +38,8 @@
                             />
                             <div class="absolute inset-0 bg-black/40"></div>
                             {% else %}
-                            <!-- Черный фон с логотипом если нет изображения -->
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <img 
-                                    src="{% static 'img/Logo.png' %}?v=2" 
-                                    alt="Avto-Декор" 
-                                    class="h-16 sm:h-20 opacity-20"
-                                    style="max-width: 80px; width: auto; height: auto; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
-                                />
-                            </div>
+                            <!-- Черный фон если нет изображения -->
+                            <div class="absolute inset-0 bg-black"></div>
                             {% endif %}
                         </div>
                     </div>
