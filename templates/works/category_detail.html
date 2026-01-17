@@ -26,13 +26,24 @@
     {% if works %}
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {% for work in works %}
-        <div class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 aspect-square">
+        <div 
+            class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all hover:scale-105 cursor-pointer"
+            onclick="openLightbox({{ forloop.counter0 }})"
+            style="min-height: 200px; height: auto;"
+        >
             <img
                 src="{{ work.image.url }}"
                 alt="{{ category.name }} - работа {{ forloop.counter }}"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                style="min-height: 200px; max-height: 300px; object-fit: cover;"
             />
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+            <!-- Иконка увеличения -->
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg class="w-6 h-6 text-white bg-black/50 rounded-full p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+                </svg>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -43,5 +54,163 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Lightbox Modal -->
+<div id="lightbox-modal" class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+    <button 
+        onclick="closeLightbox()" 
+        class="absolute top-4 right-4 text-white hover:text-red-700 transition-colors z-10"
+        aria-label="Закрыть"
+    >
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+    </button>
+    
+    <!-- Кнопка "Назад" -->
+    <button 
+        onclick="previousImage()" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-red-700 transition-colors z-10 bg-black/50 rounded-full p-3"
+        aria-label="Предыдущее изображение"
+        id="lightbox-prev-btn"
+    >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </button>
+    
+    <!-- Кнопка "Вперед" -->
+    <button 
+        onclick="nextImage()" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-red-700 transition-colors z-10 bg-black/50 rounded-full p-3"
+        aria-label="Следующее изображение"
+        id="lightbox-next-btn"
+    >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+    </button>
+    
+    <!-- Изображение -->
+    <div class="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
+        <img 
+            id="lightbox-image" 
+            src="" 
+            alt="" 
+            class="max-w-full max-h-full object-contain rounded-lg"
+        />
+    </div>
+    
+    <!-- Счетчик -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/50 rounded-full px-4 py-2 text-sm">
+        <span id="lightbox-counter">1 / 1</span>
+    </div>
+</div>
+
+<script>
+    let currentImageIndex = 0;
+    const works = [
+        {% for work in works %}
+        {
+            url: "{{ work.image.url }}",
+            alt: "{{ category.name }} - работа {{ forloop.counter }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    function openLightbox(index) {
+        if (works.length === 0) return;
+        
+        currentImageIndex = index;
+        updateLightboxImage();
+        
+        const modal = document.getElementById('lightbox-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    function closeLightbox() {
+        const modal = document.getElementById('lightbox-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    function updateLightboxImage() {
+        if (works.length === 0) return;
+        
+        const img = document.getElementById('lightbox-image');
+        const counter = document.getElementById('lightbox-counter');
+        const prevBtn = document.getElementById('lightbox-prev-btn');
+        const nextBtn = document.getElementById('lightbox-next-btn');
+        
+        if (img && works[currentImageIndex]) {
+            img.src = works[currentImageIndex].url;
+            img.alt = works[currentImageIndex].alt;
+        }
+        
+        if (counter) {
+            counter.textContent = `${currentImageIndex + 1} / ${works.length}`;
+        }
+        
+        // Показываем/скрываем кнопки навигации
+        if (prevBtn) {
+            prevBtn.style.display = works.length > 1 ? 'block' : 'none';
+        }
+        if (nextBtn) {
+            nextBtn.style.display = works.length > 1 ? 'block' : 'none';
+        }
+    }
+    
+    function previousImage() {
+        if (works.length === 0) return;
+        currentImageIndex = (currentImageIndex - 1 + works.length) % works.length;
+        updateLightboxImage();
+    }
+    
+    function nextImage() {
+        if (works.length === 0) return;
+        currentImageIndex = (currentImageIndex + 1) % works.length;
+        updateLightboxImage();
+    }
+    
+    // Закрытие по клику вне изображения
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('lightbox-modal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal || event.target.id === 'lightbox-modal') {
+                    closeLightbox();
+                }
+            });
+        }
+        
+        // Закрытие по Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('lightbox-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeLightbox();
+                }
+            }
+            // Навигация стрелками
+            if (event.key === 'ArrowLeft') {
+                const modal = document.getElementById('lightbox-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    previousImage();
+                }
+            }
+            if (event.key === 'ArrowRight') {
+                const modal = document.getElementById('lightbox-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    nextImage();
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
 
