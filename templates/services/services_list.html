@@ -16,6 +16,14 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {% for service in services %}
         <div class="group relative overflow-hidden rounded-lg border border-red-900/20 hover:border-red-700/50 transition-all bg-black">
+            <!-- Фоновое изображение (затемненное) или черный фон -->
+            {% if service.image %}
+            <div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition-opacity" style="background-image: url('{{ service.image.url }}');"></div>
+            {% endif %}
+            
+            <!-- Затемняющий overlay -->
+            <div class="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors"></div>
+            
             <!-- Логотип справа снизу -->
             <div class="absolute bottom-4 right-4 opacity-25 z-0">
                 <img 
@@ -30,13 +38,25 @@
             <div class="relative p-4 sm:p-6 md:p-8 z-10">
                 <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                     <div class="flex-shrink-0 w-full sm:w-auto">
-                        <div class="bg-red-700/20 rounded-lg flex items-center justify-center border border-red-700/30 overflow-hidden" style="min-height: 150px; width: 100%; max-width: 200px; height: 150px;">
+                        <div class="rounded-lg flex items-center justify-center border border-red-700/30 overflow-hidden relative" style="min-height: 150px; width: 100%; max-width: 200px; height: 150px; background: black;">
                             {% if service.image %}
-                            <img src="{{ service.image.url }}" alt="{{ service.title }}" class="w-full h-full object-cover rounded" style="min-height: 150px; max-width: 100%; height: auto;">
+                            <img 
+                                src="{{ service.image.url }}" 
+                                alt="{{ service.title }}" 
+                                class="w-full h-full object-cover rounded opacity-60"
+                                style="min-height: 150px; max-width: 100%; height: auto;"
+                            />
+                            <div class="absolute inset-0 bg-black/40"></div>
                             {% else %}
-                            <svg class="w-16 h-16 text-red-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
+                            <!-- Черный фон с логотипом если нет изображения -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <img 
+                                    src="{% static 'img/Logo.png' %}?v=2" 
+                                    alt="Avto-Декор" 
+                                    class="h-16 sm:h-20 opacity-20"
+                                    style="max-width: 80px; width: auto; height: auto; filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(340deg) brightness(0.8) contrast(1.4);"
+                                />
+                            </div>
                             {% endif %}
                         </div>
                     </div>
