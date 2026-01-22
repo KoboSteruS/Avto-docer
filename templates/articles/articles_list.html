@@ -77,27 +77,16 @@
                 
                 <!-- Текст с ограничением -->
                 <div class="article-content-wrapper" data-article-id="{{ article.id }}">
-                    <div class="article-content-collapsed" style="max-height: 6em; overflow: hidden;">
-                        <div class="article-content-full" style="word-wrap: break-word; overflow-wrap: break-word; color: #ffffff; font-size: 16px; line-height: 1.7;">
-                            {{ article.content|safe }}
-                        </div>
+                    <div class="article-content article-content-full" style="word-wrap: break-word; overflow-wrap: break-word; color: #ffffff; font-size: 16px; line-height: 1.7; max-height: 6em; overflow: hidden; position: relative;">
+                        {{ article.content|safe }}
                     </div>
-                    <div class="article-content-expanded hidden">
-                        <div class="article-content-full" style="word-wrap: break-word; overflow-wrap: break-word; color: #ffffff; font-size: 16px; line-height: 1.7;">
-                            {{ article.content|safe }}
-                        </div>
-                    </div>
+                    <div class="article-fade" style="height: 3em; background: linear-gradient(to bottom, transparent, black); position: relative; margin-top: -3em; pointer-events: none;"></div>
                     <button 
-                        class="article-expand-btn mt-3 text-red-600 hover:text-red-500 transition-colors text-sm font-medium cursor-pointer"
-                        onclick="toggleArticle({{ article.id }})"
+                        class="article-expand-btn mt-1 text-red-600 hover:text-red-500 transition-colors text-sm font-medium cursor-pointer block"
+                        data-article-id="{{ article.id }}"
+                        type="button"
                     >
                         Развернуть
-                    </button>
-                    <button 
-                        class="article-collapse-btn mt-3 text-red-600 hover:text-red-500 transition-colors text-sm font-medium hidden cursor-pointer"
-                        onclick="toggleArticle({{ article.id }})"
-                    >
-                        Свернуть
                     </button>
                 </div>
                 
@@ -149,41 +138,62 @@
 </div>
 
 <script>
-function toggleArticle(articleId) {
-    const wrapper = document.querySelector(`[data-article-id="${articleId}"]`);
-    const collapsed = wrapper.querySelector('.article-content-collapsed');
-    const expanded = wrapper.querySelector('.article-content-expanded');
-    const expandBtn = wrapper.querySelector('.article-expand-btn');
-    const collapseBtn = wrapper.querySelector('.article-collapse-btn');
-    
-    if (collapsed.classList.contains('hidden')) {
-        // Сворачиваем
-        collapsed.classList.remove('hidden');
-        expanded.classList.add('hidden');
-        expandBtn.classList.remove('hidden');
-        collapseBtn.classList.add('hidden');
-    } else {
-        // Разворачиваем
-        collapsed.classList.add('hidden');
-        expanded.classList.remove('hidden');
-        expandBtn.classList.add('hidden');
-        collapseBtn.classList.remove('hidden');
-    }
-}
-
-// Скрываем кнопку "Развернуть" если контент короткий
+// Инициализация: ограничиваем высоту и показываем кнопку только для длинных текстов
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.article-content-wrapper').forEach(wrapper => {
-        const collapsed = wrapper.querySelector('.article-content-collapsed');
+    console.log('DOM Content Loaded - initializing articles');
+    
+    // Обрабатываем каждую статью
+    document.querySelectorAll('.article-content-wrapper').forEach((wrapper, index) => {
+        const content = wrapper.querySelector('.article-content');
+        const fade = wrapper.querySelector('.article-fade');
         const expandBtn = wrapper.querySelector('.article-expand-btn');
         
-        if (collapsed) {
-            const contentHeight = collapsed.scrollHeight;
-            const maxHeight = parseInt(getComputedStyle(collapsed).maxHeight);
+        console.log(`Article ${index}:`, {content, fade, expandBtn});
+        
+        if (content && expandBtn) {
+            // Убираем ограничение чтобы измерить полную высоту
+            content.style.maxHeight = 'none';
+            content.style.overflow = 'visible';
+            const fullHeight = content.scrollHeight;
             
-            // Если контент помещается в ограниченную высоту, скрываем кнопку
-            if (contentHeight <= maxHeight) {
-                expandBtn.style.display = 'none';
+            console.log(`Article ${index} full height:`, fullHeight);
+            
+            // Если контент короткий, скрываем кнопку и fade
+            if (fullHeight <= 120) {
+                if (expandBtn) expandBtn.style.display = 'none';
+                if (fade) fade.style.display = 'none';
+                content.style.maxHeight = 'none';
+                content.style.overflow = 'visible';
+                console.log(`Article ${index} is short, hiding button`);
+            } else {
+                // Устанавливаем ограничение для длинных текстов
+                content.style.maxHeight = '6em';
+                content.style.overflow = 'hidden';
+                console.log(`Article ${index} is long, showing button`);
+                
+                // Добавляем обработчик клика
+                expandBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Button clicked for article:', index);
+                    
+                    if (content.classList.contains('article-expanded')) {
+                        // Сворачиваем
+                        content.classList.remove('article-expanded');
+                        content.style.maxHeight = '6em';
+                        content.style.overflow = 'hidden';
+                        if (fade) fade.style.display = 'block';
+                        expandBtn.textContent = 'Развернуть';
+                        console.log('Collapsed');
+                    } else {
+                        // Разворачиваем
+                        content.classList.add('article-expanded');
+                        content.style.maxHeight = 'none';
+                        content.style.overflow = 'visible';
+                        if (fade) fade.style.display = 'none';
+                        expandBtn.textContent = 'Свернуть';
+                        console.log('Expanded');
+                    }
+                });
             }
         }
     });
