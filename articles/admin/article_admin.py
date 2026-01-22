@@ -4,7 +4,27 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from articles.models import Article
+from articles.models import Article, ArticleImage
+
+
+class ArticleImageInline(admin.TabularInline):
+    """
+    Inline для управления изображениями статьи
+    """
+    model = ArticleImage
+    extra = 1
+    fields = ['image', 'image_preview', 'order', 'caption']
+    readonly_fields = ['image_preview']
+    
+    def image_preview(self, obj):
+        """Превью изображения"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 150px; max-height: 100px; border-radius: 4px;" />',
+                obj.image.url
+            )
+        return format_html('<span style="color: #999;">Нет изображения</span>')
+    image_preview.short_description = 'Превью'
 
 
 @admin.register(Article)
@@ -13,6 +33,7 @@ class ArticleAdmin(admin.ModelAdmin):
     Админка для управления статьями.
     Удобный интерфейс с превью изображений и видео.
     """
+    inlines = [ArticleImageInline]
     list_display = ['title', 'slug', 'image_preview', 'video_preview', 'is_published', 'views', 'created_at']
     list_filter = ['is_published', 'created_at', 'updated_at']
     search_fields = ['title', 'slug', 'content']
