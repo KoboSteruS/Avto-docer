@@ -300,13 +300,13 @@ class Command(BaseCommand):
                             # Если текста нет, но есть медиа - создаём заголовок из даты + времени
                             post_date = message.get('forward_date') or message.get('date', int(time.time()))
                             date_obj = datetime.fromtimestamp(post_date)
-                            # Добавляем время чтобы избежать дубликатов для постов в один день
+                            # Добавляем время с секундами чтобы избежать дубликатов
                             if video:
-                                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M')}"
-                                content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M')}"
+                                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
+                                content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
                             else:
-                                title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M')}"
-                                content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M')}"
+                                title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
+                                content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
                         
                         # Проверяем дубликат
                         if Article.objects.filter(title=title).exists():
