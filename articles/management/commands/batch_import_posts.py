@@ -270,6 +270,7 @@ class Command(BaseCommand):
                         
                         # Получаем фото (может быть одно фото или группа)
                         photos = []
+                        video = None
                         
                         # Проверяем, это объединённая медиа-группа?
                         if '_all_photos' in message:
@@ -280,9 +281,13 @@ class Command(BaseCommand):
                             photo = max(message['photo'], key=lambda x: x.get('file_size', 0))
                             photos.append(photo)
                         
-                        # Если нет текста И нет фото - пропускаем
-                        if not text and not photos:
-                            logger.warning(f'   ⚠️  Пост #{idx}: Нет текста и фото, пропускаем')
+                        # Проверяем видео
+                        if 'video' in message:
+                            video = message['video']
+                        
+                        # Если нет текста И нет фото И нет видео - пропускаем
+                        if not text and not photos and not video:
+                            logger.warning(f'   ⚠️  Пост #{idx}: Нет текста, фото и видео, пропускаем')
                             skipped_count += 1
                             continue
                         
@@ -292,11 +297,16 @@ class Command(BaseCommand):
                             title = lines[0][:255]
                             content = lines[1] if len(lines) > 1 else text
                         else:
-                            # Если текста нет, но есть фото - создаём заголовок из даты
+                            # Если текста нет, но есть медиа - создаём заголовок из даты + времени
                             post_date = message.get('forward_date') or message.get('date', int(time.time()))
                             date_obj = datetime.fromtimestamp(post_date)
-                            title = f"Фото от {date_obj.strftime('%d.%m.%Y')}"
-                            content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M')}"
+                            # Добавляем время чтобы избежать дубликатов для постов в один день
+                            if video:
+                                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M')}"
+                                content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M')}"
+                            else:
+                                title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M')}"
+                                content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M')}"
                         
                         # Проверяем дубликат
                         if Article.objects.filter(title=title).exists():
@@ -305,10 +315,15 @@ class Command(BaseCommand):
                             continue
                         
                         # Логируем с информацией о содержимом
+                        media_info = []
                         if text:
-                            logger.info(f'   📰 Пост #{idx}: {title[:50]}... (📝 текст, 📷 {len(photos)} фото)')
-                        else:
-                            logger.info(f'   📷 Пост #{idx}: {title[:50]}... (только фото: {len(photos)} шт.)')
+                            media_info.append('📝 текст')
+                        if photos:
+                            media_info.append(f'📷 {len(photos)} фото')
+                        if video:
+                            media_info.append('🎬 видео')
+                        
+                        logger.info(f'   📰 Пост #{idx}: {title[:50]}... ({", ".join(media_info) if media_info else "нет контента"})')
                         
                         # Создаём статью
                         article = Article.objects.create(
@@ -384,6 +399,58 @@ class Command(BaseCommand):
                         
                         if saved_photos > 0:
                             logger.info(f'      ✅ Сохранено фото: {saved_photos}/{len(photos)}')
+                        
+                        # Сохраняем видео
+                        if video:
+                            try:
+                                file_id = video['file_id']
+                                
+                                file_response = requests.get(
+                                    f'{api_url}/getFile',
+                                    params={'file_id': file_id},
+                                    timeout=10
+                                )
+                                file_response.raise_for_status()
+                                file_data = file_response.json()
+                                
+                                if file_data.get('ok'):
+                                    file_path = file_data['result']['file_path']
+                                    file_url = f'https://api.telegram.org/file/bot{token}/{file_path}'
+                                    
+                                    logger.info(f'      🎬 Скачиваю видео...')
+                                    video_response = requests.get(file_url, timeout=60)
+                                    video_response.raise_for_status()
+                                    
+                                    video_content = BytesIO(video_response.content)
+                                    # Определяем расширение из mime_type
+                                    mime_type = video.get('mime_type', 'video/mp4')
+                                    ext = 'mp4'  # По умолчанию
+                                    if 'webm' in mime_type:
+                                        ext = 'webm'
+                                    elif 'avi' in mime_type:
+                                        ext = 'avi'
+                                    elif 'mov' in mime_type:
+                                        ext = 'mov'
+                                    
+                                    video_name = f'{article.slug}.{ext}'
+                                    
+                                    article.video_file.save(
+                                        video_name,
+                                        InMemoryUploadedFile(
+                                            video_content,
+                                            None,
+                                            video_name,
+                                            mime_type,
+                                            len(video_response.content),
+                                            None
+                                        )
+                                    )
+                                    logger.info(f'      ✅ Видео сохранено: {video_name}')
+                                else:
+                                    logger.warning(f'      ⚠️  Видео: API ошибка')
+                            
+                            except Exception as e:
+                                logger.error(f'      ❌ Ошибка видео: {e}')
                         
                         created_count += 1
                         logger.info(f'      ✅ Создана: {article.slug}')
