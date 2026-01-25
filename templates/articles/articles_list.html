@@ -37,10 +37,14 @@
                     preload="metadata"
                     style="max-height: 400px;"
                     {% if article.image %}poster="{{ article.image.url }}"{% endif %}
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
                 >
                     <source src="{% url 'articles:video_stream' article.id %}" type="video/mp4">
                     Ваш браузер не поддерживает видео.
                 </video>
+                <div style="display: none; padding: 20px; background: #1a1a1a; border: 1px solid #dc2626; border-radius: 8px; color: #fff;">
+                    <p style="margin: 0; color: #dc2626;">⚠️ Видео недоступно для воспроизведения (файл слишком большой > 20MB)</p>
+                </div>
                 {% elif article.is_youtube_url or article.is_vimeo_url %}
                 <!-- YouTube/Vimeo embed -->
                 <div class="relative w-full" style="padding-bottom: 56.25%;">

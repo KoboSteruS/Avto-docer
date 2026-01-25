@@ -58,7 +58,18 @@ def stream_telegram_video(request, article_id):
         file_data = file_info_response.json()
         
         if not file_data.get('ok'):
+            error_desc = file_data.get('description', 'Unknown error')
             django_logger.error(f"Telegram API вернул ошибку: {file_data}")
+            
+            # Специальная обработка для больших файлов
+            if 'file is too big' in error_desc.lower():
+                return HttpResponse(
+                    "Видео слишком большое для streaming через Telegram Bot API (лимит 20MB). "
+                    "Пожалуйста, используйте прямую ссылку на видео или загрузите файл меньшего размера.",
+                    status=413,
+                    content_type='text/plain; charset=utf-8'
+                )
+            
             raise Http404("Видео недоступно")
         
         file_path = file_data['result']['file_path']
