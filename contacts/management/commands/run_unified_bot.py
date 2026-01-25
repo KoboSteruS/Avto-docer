@@ -561,54 +561,19 @@ class Command(BaseCommand):
             if video:
                 try:
                     file_id = video['file_id']
+                    file_size = video.get('file_size', 0)
                     
-                    file_response = requests.get(
-                        f'{api_url}/getFile',
-                        params={'file_id': file_id},
-                        timeout=10
-                    )
-                    file_response.raise_for_status()
-                    file_data = file_response.json()
+                    # НОВАЯ ЛОГИКА: сохраняем file_id вместо скачивания
+                    # Видео будет проксироваться через наш сервер при отображении
+                    article.video_url = file_id
+                    article.save()
                     
-                    if file_data.get('ok'):
-                        file_path = file_data['result']['file_path']
-                        token = api_url.split('bot')[1].split('/')[0]
-                        file_url = f'https://api.telegram.org/file/bot{token}/{file_path}'
-                        
-                        logger.info(f'   🎬 Скачиваю видео...')
-                        video_response = requests.get(file_url, timeout=60)
-                        video_response.raise_for_status()
-                        
-                        video_content = BytesIO(video_response.content)
-                        # Определяем расширение из mime_type
-                        mime_type = video.get('mime_type', 'video/mp4')
-                        ext = 'mp4'  # По умолчанию
-                        if 'webm' in mime_type:
-                            ext = 'webm'
-                        elif 'avi' in mime_type:
-                            ext = 'avi'
-                        elif 'mov' in mime_type:
-                            ext = 'mov'
-                        
-                        video_name = f'{article.slug}.{ext}'
-                        
-                        article.video_file.save(
-                            video_name,
-                            InMemoryUploadedFile(
-                                video_content,
-                                None,
-                                video_name,
-                                mime_type,
-                                len(video_response.content),
-                                None
-                            )
-                        )
-                        logger.info(f'   ✅ Видео сохранено: {video_name}')
-                    else:
-                        logger.warning(f'   ⚠️  Видео: API ошибка')
+                    size_mb = file_size / (1024 * 1024) if file_size else 0
+                    logger.info(f'   ✅ Видео сохранено (file_id, ~{size_mb:.1f}MB)')
+                    logger.info(f'      Видео будет стримиться через прокси-сервер')
                 
                 except Exception as e:
-                    logger.error(f'   ❌ Ошибка видео: {e}')
+                    logger.error(f'   ❌ Ошибка сохранения видео: {e}')
             
             # Обновляем синхронизацию
             sync.update_last_message(message_id, post_date, update_id)

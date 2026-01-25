@@ -28,7 +28,21 @@
             </div>
             {% elif article.video_url %}
             <div class="w-full bg-black rounded-lg overflow-hidden">
-                {% if article.is_youtube_url or article.is_vimeo_url %}
+                <!-- Проверяем, это file_id от Telegram или обычная ссылка -->
+                {% if article.video_url|length > 50 and not 'http' in article.video_url %}
+                <!-- Это file_id от Telegram - проксируем через наш сервер -->
+                <video 
+                    class="w-full" 
+                    controls 
+                    preload="metadata"
+                    style="max-height: 400px;"
+                    {% if article.image %}poster="{{ article.image.url }}"{% endif %}
+                >
+                    <source src="{% url 'articles:video_stream' article.id %}" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+                {% elif article.is_youtube_url or article.is_vimeo_url %}
+                <!-- YouTube/Vimeo embed -->
                 <div class="relative w-full" style="padding-bottom: 56.25%;">
                     <iframe 
                         src="{{ article.get_video_embed_url }}"
@@ -39,6 +53,7 @@
                     ></iframe>
                 </div>
                 {% else %}
+                <!-- Прямая ссылка на видео -->
                 <video 
                     class="w-full" 
                     controls 
