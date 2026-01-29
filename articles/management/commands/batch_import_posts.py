@@ -405,15 +405,31 @@ class Command(BaseCommand):
                             try:
                                 file_id = video['file_id']
                                 file_size = video.get('file_size', 0)
-                                
-                                # НОВАЯ ЛОГИКА: сохраняем file_id вместо скачивания
-                                # Видео будет проксироваться через наш сервер при отображении
-                                article.video_url = file_id
-                                article.save()
-                                
                                 size_mb = file_size / (1024 * 1024) if file_size else 0
-                                logger.info(f'      ✅ Видео сохранено (file_id, ~{size_mb:.1f}MB)')
-                                logger.info(f'         Видео будет стримиться через прокси-сервер')
+                                
+                                # Получаем username канала из пересланного сообщения
+                                forward_from_chat = message.get('forward_from_chat', {})
+                                channel_username = forward_from_chat.get('username', '')
+                                
+                                # ВАРИАНТ 2: Если видео > 20MB - ставим статус pending для скачивания через Telethon
+                                if file_size > 20 * 1024 * 1024:  # 20MB в байтах
+                                    article.telegram_channel_username = channel_username
+                                    article.telegram_message_id = message.get('forward_from_message_id') or message.get('message_id')
+                                    article.video_status = 'pending'
+                                    article.video_url = None  # Не сохраняем file_id для больших видео
+                                    article.save()
+                                    
+                                    logger.info(f'      ✅ Видео сохранено (большое, ~{size_mb:.1f}MB)')
+                                    logger.info(f'         Статус: pending (будет скачано через Telethon worker)')
+                                    if channel_username:
+                                        logger.info(f'         Канал: @{channel_username}, Message ID: {article.telegram_message_id}')
+                                else:
+                                    # ВАРИАНТ 2: Видео < 20MB - сохраняем file_id для проксирования
+                                    article.video_url = file_id
+                                    article.save()
+                                    
+                                    logger.info(f'      ✅ Видео сохранено (file_id, ~{size_mb:.1f}MB)')
+                                    logger.info(f'         Видео будет стримиться через прокси-сервер')
                             
                             except Exception as e:
                                 logger.error(f'      ❌ Ошибка сохранения видео: {e}')

@@ -59,10 +59,11 @@ def stream_telegram_video(request, article_id):
         
         if not file_data.get('ok'):
             error_desc = file_data.get('description', 'Unknown error')
-            django_logger.error(f"Telegram API вернул ошибку: {file_data}")
+            error_code = file_data.get('error_code', 0)
             
-            # Специальная обработка для больших файлов
-            if 'file is too big' in error_desc.lower():
+            # Специальная обработка для больших файлов (не логируем как ошибку)
+            if 'file is too big' in error_desc.lower() or error_code == 400:
+                django_logger.info(f"Видео слишком большое для streaming (file_id={file_id[:20]}...), лимит Telegram Bot API 20MB")
                 return HttpResponse(
                     "Видео слишком большое для streaming через Telegram Bot API (лимит 20MB). "
                     "Пожалуйста, используйте прямую ссылку на видео или загрузите файл меньшего размера.",
@@ -70,6 +71,8 @@ def stream_telegram_video(request, article_id):
                     content_type='text/plain; charset=utf-8'
                 )
             
+            # Для других ошибок логируем как warning
+            django_logger.warning(f"Telegram API вернул ошибку для file_id={file_id[:20]}...: {error_desc}")
             raise Http404("Видео недоступно")
         
         file_path = file_data['result']['file_path']
@@ -112,12 +115,15 @@ def stream_telegram_video(request, article_id):
         return streaming_response
         
     except Article.DoesNotExist:
-        django_logger.warning(f"Статья {article_id} не найдена")
+        django_logger.warning(f"Статья {article_id} не найдена или не опубликована")
         raise Http404("Статья не найдена")
+    except Http404:
+        # Пробрасываем Http404 дальше
+        raise
     except requests.RequestException as e:
-        django_logger.error(f"Ошибка при запросе к Telegram API: {e}")
+        django_logger.warning(f"Ошибка сети при запросе к Telegram API для статьи {article_id}: {e}")
         return HttpResponse("Ошибка при получении видео", status=502)
     except Exception as e:
-        django_logger.error(f"Неожиданная ошибка при проксировании видео: {e}")
+        django_logger.error(f"Неожиданная ошибка при проксировании видео для статьи {article_id}: {e}")
         django_logger.exception(e)  # Полный traceback
         return HttpResponse("Внутренняя ошибка сервера", status=500)

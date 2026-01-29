@@ -75,6 +75,14 @@ def submit_contact_form_ajax(request):
     """
     form = ContactForm(request.POST)
     
+    # Проверяем согласие на обработку персональных данных
+    if not form.data.get('privacy_consent'):
+        return JsonResponse({
+            'success': False,
+            'errors': {'privacy_consent': ['Необходимо согласие на обработку персональных данных']},
+            'message': 'Необходимо согласие на обработку персональных данных.'
+        }, status=400)
+    
     if form.is_valid():
         try:
             # Отправляем заявку в Telegram

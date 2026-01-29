@@ -25,6 +25,8 @@ python manage.py import_forwarded_posts --auto-publish
 python manage.py import_forwarded_posts --timeout 600  # 10 минут
 ```
 
+python manage.py batch_import_posts --timeout 60 --batch-size 25 --auto-publish
+
 ### Шаг 2: Найди бота в Telegram
 
 Команда покажет username бота, например:

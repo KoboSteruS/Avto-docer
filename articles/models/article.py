@@ -56,6 +56,31 @@ class Article(BaseModel):
         verbose_name='URL видео',
         help_text='Или укажите ссылку на видео (YouTube, Vimeo или прямой файл). Если указано и файл, и URL, приоритет у файла'
     )
+    telegram_channel_username = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Telegram канал',
+        help_text='Username канала в Telegram (без @) для больших видео'
+    )
+    telegram_message_id = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name='ID сообщения в Telegram',
+        help_text='ID сообщения в канале для скачивания видео'
+    )
+    video_status = models.CharField(
+        max_length=32,
+        choices=[
+            ('pending', 'Ожидает скачивания'),
+            ('downloading', 'Скачивается'),
+            ('ready', 'Готово'),
+            ('error', 'Ошибка'),
+        ],
+        default='ready',
+        verbose_name='Статус видео',
+        help_text='Статус обработки видео (для больших файлов >20MB)'
+    )
     is_published = models.BooleanField(
         default=False,
         verbose_name='Опубликовано',
@@ -155,3 +180,25 @@ class Article(BaseModel):
         if len(text) > max_length:
             text = text[:max_length] + '...'
         return text
+    
+    def is_telegram_file_id(self):
+        """Проверка, является ли video_url file_id от Telegram"""
+        if not self.video_url:
+            return False
+        # file_id обычно длинный и не содержит http/https
+        return len(self.video_url) > 50 and not self.video_url.startswith('http')
+    
+    def is_large_telegram_video(self):
+        """Проверка, является ли это большим видео из Telegram (ожидает скачивания)"""
+        return bool(
+            self.telegram_channel_username and 
+            self.telegram_message_id and 
+            self.video_status in ['pending', 'downloading', 'error']
+        )
+    
+    def get_telegram_video_url(self):
+        """Получить ссылку на видео в Telegram канале"""
+        if not (self.telegram_channel_username and self.telegram_message_id):
+            return None
+        channel = self.telegram_channel_username.lstrip('@')
+        return f'https://t.me/{channel}/{self.telegram_message_id}'

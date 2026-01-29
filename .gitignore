@@ -53,3 +53,8 @@ Thumbs.db
 # Data files
 /data
 data/
+
+# Telethon session files
+telethon_worker/*.session
+telethon_worker/session.session
+*.session

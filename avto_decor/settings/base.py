@@ -60,6 +60,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.seo.seo_meta',
             ],
         },
     },
@@ -110,4 +111,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# SEO Settings
+SITE_URL = 'https://www.avto-decor.com'
+SITE_NAME = 'Avto-Декор'
 

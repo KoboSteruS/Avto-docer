@@ -57,6 +57,15 @@ class ContactForm(forms.Form):
         })
     )
     
+    privacy_consent = forms.BooleanField(
+        required=True,
+        label='Согласие на обработку персональных данных',
+        widget=forms.CheckboxInput(attrs={
+            'class': 'w-4 h-4 text-red-700 bg-gray-800 border-gray-700 rounded focus:ring-red-700 focus:ring-2',
+            'required': True,
+        })
+    )
+    
     def clean_name(self):
         """
         Валидация имени

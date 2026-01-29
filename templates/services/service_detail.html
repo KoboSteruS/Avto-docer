@@ -48,6 +48,31 @@
 </section>
 {% endif %}
 
+<!-- Additional Images Section (встроенные в текст) -->
+{% if service.additional_images.exists %}
+<section class="container mx-auto px-4 py-10">
+    <div class="max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for service_image in service.additional_images.all %}
+            <div class="rounded-lg overflow-hidden border border-red-900/20">
+                <img
+                    src="{{ service_image.image.url }}"
+                    alt="{% if service_image.caption %}{{ service_image.caption }}{% else %}{{ service.title }}{% endif %}"
+                    class="w-full h-auto object-cover"
+                    loading="lazy"
+                />
+                {% if service_image.caption %}
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-4">
+                    <p class="text-gray-300 text-sm">{{ service_image.caption }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Content Blocks Section -->
 {% if service.content %}
 <section class="container mx-auto px-4 py-20">
@@ -89,7 +114,7 @@
 </section>
 {% endif %}
 
-<!-- Image Block -->
+<!-- Main Image Block -->
 {% if service.image %}
 <section class="container mx-auto px-4 py-20">
     <div class="max-w-4xl mx-auto">
@@ -98,7 +123,36 @@
                 src="{{ service.image.url }}"
                 alt="{{ service.title }}"
                 class="w-full h-auto object-cover"
+                loading="lazy"
             />
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Additional Images Gallery Section (в конце) -->
+{% if service.additional_images.exists %}
+<section class="container mx-auto px-4 py-20">
+    <div class="max-w-6xl mx-auto">
+        <h2 class="text-4xl text-center mb-12 text-white">
+            <span class="text-red-700">Галерея</span> работ
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for service_image in service.additional_images.all %}
+            <div class="rounded-lg overflow-hidden border border-red-900/20 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+                <img
+                    src="{{ service_image.image.url }}"
+                    alt="{% if service_image.caption %}{{ service_image.caption }}{% else %}{{ service.title }} - Изображение {{ forloop.counter }}{% endif %}"
+                    class="w-full h-auto object-cover"
+                    loading="lazy"
+                />
+                {% if service_image.caption %}
+                <div class="p-4">
+                    <p class="text-gray-300 text-sm">{{ service_image.caption }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>

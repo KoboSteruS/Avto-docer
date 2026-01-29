@@ -1,0 +1,32 @@
+[Unit]
+Description=Telethon Video Downloader Worker for Avto-Decor
+After=network.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/Avto-docer
+Environment="PATH=/root/Avto-docer/venv/bin"
+Environment="DJANGO_SETTINGS_MODULE=avto_decor.settings.production"
+Environment="PYTHONUNBUFFERED=1"
+
+# Команда запуска
+ExecStart=/root/Avto-docer/venv/bin/python manage.py download_pending_videos --loop --interval 300
+
+# Перезапуск при ошибках
+Restart=always
+RestartSec=10
+
+# Лимиты ресурсов
+LimitNOFILE=65536
+MemoryMax=2G
+
+# Логирование
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telethon-video-worker
+
+[Install]
+WantedBy=multi-user.target
+

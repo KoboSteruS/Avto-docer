@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.avto-decor.com/sitemap.xml
+
+# Запрещаем индексацию админки
+Disallow: /admin/
+Disallow: /admin
+
+# Запрещаем индексацию медиа файлов (если нужно)
+# Disallow: /media/
+

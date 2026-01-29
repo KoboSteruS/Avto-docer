@@ -20,6 +20,56 @@
                 Ваш браузер не поддерживает видео.
             </video>
         </div>
+        {% elif article.is_large_telegram_video %}
+        <!-- Большое видео из Telegram - показываем превью и статус -->
+        <div class="w-full mb-4 rounded-lg overflow-hidden relative">
+            {% if article.image %}
+            <img 
+                src="{{ article.image.url }}" 
+                alt="{{ article.title }}"
+                class="w-full h-auto object-cover"
+                style="max-height: 500px; opacity: 0.7;"
+            />
+            {% else %}
+            <div class="w-full bg-gradient-to-br from-gray-800 to-gray-900" style="height: 500px; display: flex; align-items: center; justify-center;">
+                <svg class="w-32 h-32 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            {% endif %}
+            <div class="absolute inset-0 flex items-center justify-center bg-black/50">
+                {% if article.video_status == 'downloading' %}
+                <div class="bg-yellow-700/90 px-10 py-5 rounded-lg text-white font-medium text-xl flex items-center gap-3 shadow-lg">
+                    <svg class="w-7 h-7 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>Видео скачивается...</span>
+                </div>
+                {% elif article.video_status == 'error' %}
+                <div class="bg-red-700/90 px-10 py-5 rounded-lg text-white font-medium text-xl flex flex-col items-center gap-3 shadow-lg text-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Ошибка скачивания</span>
+                    <a 
+                        href="{{ article.get_telegram_video_url }}" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="text-sm underline mt-2"
+                    >
+                        Смотреть в Telegram
+                    </a>
+                </div>
+                {% else %}
+                <div class="bg-gray-800/90 px-10 py-5 rounded-lg text-white font-medium text-xl flex items-center gap-3 shadow-lg">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Ожидает скачивания</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
         {% elif article.video_url %}
         <div class="w-full mb-4 rounded-lg overflow-hidden">
             <!-- Проверяем, это file_id от Telegram или обычная ссылка -->

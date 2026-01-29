@@ -219,6 +219,21 @@
                         {% endif %}
                     </div>
                     
+                    <!-- Privacy Consent -->
+                    <div>
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            {{ form.privacy_consent }}
+                            <span class="text-gray-300 text-sm">
+                                Я согласен(а) на <a href="{% url 'core:privacy' %}" target="_blank" class="text-red-700 hover:text-red-600 underline">обработку персональных данных</a> <span class="text-red-500">*</span>
+                            </span>
+                        </label>
+                        {% if form.privacy_consent.errors %}
+                        <div class="mt-1 text-red-400 text-sm">
+                            {{ form.privacy_consent.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
                     <!-- Submit Button -->
                     <button
                         type="submit"

@@ -86,8 +86,8 @@ class ArticleAdmin(admin.ModelAdmin):
             ''')
         }),
         ('Медиа', {
-            'fields': ('image', 'image_preview', 'video_file', 'video_url', 'video_preview'),
-            'description': 'Добавьте главное изображение или видео. Можно загрузить видео файл или указать ссылку (YouTube, Vimeo). Если указано и изображение, и видео, будет показано видео. Приоритет у загруженного файла.'
+            'fields': ('image', 'image_preview', 'video_file', 'video_url', 'video_preview', 'video_status', 'telegram_channel_username', 'telegram_message_id'),
+            'description': 'Добавьте главное изображение или видео. Можно загрузить видео файл или указать ссылку (YouTube, Vimeo). Для больших видео из Telegram (>20MB) автоматически сохраняются telegram_channel_username и telegram_message_id, статус устанавливается в "pending" для скачивания через Telethon worker.'
         }),
         ('Статистика', {
             'fields': ('views',),
@@ -111,7 +111,21 @@ class ArticleAdmin(admin.ModelAdmin):
     
     def video_preview(self, obj):
         """Превью видео"""
-        if obj.video_file:
+        # Большое видео из Telegram
+        if obj.is_large_telegram_video():
+            telegram_url = obj.get_telegram_video_url()
+            return format_html(
+                '<div style="max-width: 400px; padding: 20px; background: #1f2937; border-radius: 8px; border-left: 4px solid #dc2626;">'
+                '<p style="color: #fff; margin: 0 0 10px 0; font-weight: bold;">📹 Большое видео из Telegram</p>'
+                '<p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 12px;">Канал: @{}</p>'
+                '<p style="color: #9ca3af; margin: 0 0 15px 0; font-size: 12px;">Message ID: {}</p>'
+                '<a href="{}" target="_blank" style="display: inline-block; background: #dc2626; color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 14px;">Смотреть в Telegram →</a>'
+                '</div>',
+                obj.telegram_channel_username or 'N/A',
+                obj.telegram_message_id or 'N/A',
+                telegram_url or '#'
+            )
+        elif obj.video_file:
             # Загруженный файл
             return format_html(
                 '<div style="max-width: 400px;">'

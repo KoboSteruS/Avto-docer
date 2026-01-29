@@ -4,6 +4,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from services.models import Service
+from services.admin.service_image_admin import ServiceImageInline
 
 
 @admin.register(Service)
@@ -17,6 +18,8 @@ class ServiceAdmin(admin.ModelAdmin):
     - Управлять порядком сортировки
     - Активировать/деактивировать услуги
     """
+    inlines = [ServiceImageInline]
+    
     list_display = [
         'title',
         'slug',
