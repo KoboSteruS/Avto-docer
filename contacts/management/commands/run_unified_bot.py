@@ -463,15 +463,27 @@ class Command(BaseCommand):
             title = lines[0][:255]
             content = lines[1] if len(lines) > 1 else text
         else:
-            # Если текста нет, но есть медиа - создаём заголовок из даты + времени
+            # Если текста нет, но есть медиа - создаём заголовок из даты + времени + message_id
             date_obj = post_date or timezone.now()
-            # Добавляем время с секундами чтобы избежать дубликатов
+            # Используем message_id для уникальности заголовка
+            msg_id_suffix = f" (#{message_id})" if message_id else ""
+            # Добавляем время с секундами и message_id чтобы избежать дубликатов
             if videos:
-                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
+                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
                 content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+            elif photos:
+                # Для постов только с фото (кружки/stories)
+                photo_count = len(photos)
+                if photo_count > 1:
+                    title = f"Фото {photo_count} шт. от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                    content = f"Галерея из {photo_count} фотографий, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                else:
+                    title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                    content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
             else:
-                title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
-                content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                # На всякий случай (не должно сюда попасть)
+                title = f"Пост от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                content = f"Пост, добавленный {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
         
         # Проверяем дубликат
         if Article.objects.filter(title=title).exists():
