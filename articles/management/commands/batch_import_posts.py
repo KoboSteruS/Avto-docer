@@ -423,12 +423,33 @@ class Command(BaseCommand):
                                             logger.info(f'      ⏭️  Видео {video_idx + 1}: уже существует')
                                             continue
                                         
-                                        video_article = Article.objects.create(
-                                            title=video_title,
-                                            content=video_content,
-                                            is_published=auto_publish,
-                                            video_status='ready'
-                                        )
+                                        try:
+                                            video_article = Article.objects.create(
+                                                title=video_title,
+                                                content=video_content,
+                                                is_published=auto_publish,
+                                                video_status='ready'
+                                            )
+                                        except Exception as create_error:
+                                            # Если ошибка дубликата slug - пробуем с уникальным суффиксом
+                                            if 'UNIQUE constraint' in str(create_error) or 'slug' in str(create_error).lower():
+                                                import time
+                                                unique_suffix = int(time.time() * 1000) % 1000000
+                                                video_title_with_suffix = f"{video_title} ({unique_suffix})"
+                                                try:
+                                                    video_article = Article.objects.create(
+                                                        title=video_title_with_suffix,
+                                                        content=video_content,
+                                                        is_published=auto_publish,
+                                                        video_status='ready'
+                                                    )
+                                                    logger.warning(f'      ⚠️  Slug дубликат для видео {video_idx + 1}, создано с суффиксом')
+                                                except Exception as e2:
+                                                    logger.error(f'      ❌ Не удалось создать статью для видео {video_idx + 1}: {e2}')
+                                                    continue
+                                            else:
+                                                logger.error(f'      ❌ Ошибка создания статьи для видео {video_idx + 1}: {create_error}')
+                                                continue
                                         
                                         # Сохраняем видео для дополнительной статьи
                                         if file_size > 20 * 1024 * 1024:
@@ -448,12 +469,32 @@ class Command(BaseCommand):
                                         continue
                                     
                                     # Первое видео - создаём основную статью
-                                    article = Article.objects.create(
-                                        title=title,
-                                        content=content,
-                                        is_published=auto_publish,
-                                        video_status='ready'
-                                    )
+                                    try:
+                                        article = Article.objects.create(
+                                            title=title,
+                                            content=content,
+                                            is_published=auto_publish,
+                                            video_status='ready'
+                                        )
+                                    except Exception as create_error:
+                                        # Если ошибка дубликата slug - пробуем с уникальным суффиксом
+                                        if 'UNIQUE constraint' in str(create_error) or 'slug' in str(create_error).lower():
+                                            import time
+                                            unique_suffix = int(time.time() * 1000) % 1000000
+                                            title_with_suffix = f"{title} ({unique_suffix})"
+                                            try:
+                                                article = Article.objects.create(
+                                                    title=title_with_suffix,
+                                                    content=content,
+                                                    is_published=auto_publish,
+                                                    video_status='ready'
+                                                )
+                                                logger.warning(f'      ⚠️  Slug дубликат, создано с суффиксом: {article.slug}')
+                                            except Exception as e2:
+                                                logger.error(f'      ❌ Не удалось создать статью даже с суффиксом: {e2}')
+                                                raise
+                                        else:
+                                            raise
                                     
                                     # Сохраняем видео для основной статьи
                                     if file_size > 20 * 1024 * 1024:
@@ -472,24 +513,51 @@ class Command(BaseCommand):
                                     
                                 except Exception as e:
                                     logger.error(f'      ❌ Ошибка сохранения видео {video_idx + 1}: {e}')
+                                    # Если статья не создана, устанавливаем article = None
+                                    if 'article' not in locals() or article is None:
+                                        article = None
                             
                             if saved_videos > 0:
                                 logger.info(f'      ✅ Сохранено видео: {saved_videos}/{len(videos)}')
                             
                             # Если были только видео - пропускаем сохранение фото
                             if not photos:
-                                created_count += 1
-                                logger.info(f'      ✅ Создана: {article.slug}')
+                                if article:
+                                    created_count += 1
+                                    logger.info(f'      ✅ Создана: {article.slug}')
                                 continue
                         else:
                             # Нет видео - создаём статью для фото/текста
-                            article = Article.objects.create(
-                                title=title,
-                                content=content,
-                                is_published=auto_publish
-                            )
+                            try:
+                                article = Article.objects.create(
+                                    title=title,
+                                    content=content,
+                                    is_published=auto_publish
+                                )
+                            except Exception as create_error:
+                                # Если ошибка дубликата slug - пробуем с уникальным суффиксом
+                                if 'UNIQUE constraint' in str(create_error) or 'slug' in str(create_error).lower():
+                                    import time
+                                    unique_suffix = int(time.time() * 1000) % 1000000
+                                    title_with_suffix = f"{title} ({unique_suffix})"
+                                    try:
+                                        article = Article.objects.create(
+                                            title=title_with_suffix,
+                                            content=content,
+                                            is_published=auto_publish
+                                        )
+                                        logger.warning(f'      ⚠️  Slug дубликат, создано с суффиксом: {article.slug}')
+                                    except Exception as e2:
+                                        logger.error(f'      ❌ Не удалось создать статью даже с суффиксом: {e2}')
+                                        raise
+                                else:
+                                    raise
                         
-                        # Сохраняем фото
+                        # Сохраняем фото (только если статья создана)
+                        if not article:
+                            logger.error(f'      ❌ Статья не создана, пропускаем сохранение фото')
+                            continue
+                        
                         saved_photos = 0
                         for photo_idx, photo in enumerate(photos):
                             try:
