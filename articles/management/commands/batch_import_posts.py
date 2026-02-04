@@ -271,6 +271,7 @@ class Command(BaseCommand):
                         # Получаем фото (может быть одно фото или группа)
                         photos = []
                         video = None
+                        video_note = None
                         
                         # Проверяем, это объединённая медиа-группа?
                         if '_all_photos' in message:
@@ -281,9 +282,15 @@ class Command(BaseCommand):
                             photo = max(message['photo'], key=lambda x: x.get('file_size', 0))
                             photos.append(photo)
                         
-                        # Проверяем видео
+                        # Проверяем обычное видео
                         if 'video' in message:
                             video = message['video']
+                        
+                        # Проверяем video_note (кружки/stories)
+                        if 'video_note' in message:
+                            video_note = message['video_note']
+                            # Для video_note используем ту же логику, что и для video
+                            video = video_note
                         
                         # Если нет текста И нет фото И нет видео - пропускаем
                         if not text and not photos and not video:
@@ -300,13 +307,28 @@ class Command(BaseCommand):
                             # Если текста нет, но есть медиа - создаём заголовок из даты + времени
                             post_date = message.get('forward_date') or message.get('date', int(time.time()))
                             date_obj = datetime.fromtimestamp(post_date)
-                            # Добавляем время с секундами чтобы избежать дубликатов
+                            message_id = message.get('forward_from_message_id') or message.get('message_id', '')
+                            msg_id_suffix = f" (#{message_id})" if message_id else ""
+                            # Добавляем время с секундами и message_id чтобы избежать дубликатов
                             if video:
-                                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
-                                content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                                if video_note:
+                                    title = f"Кружок от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                                    content = f"Видео-кружок (story), добавленный {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                                else:
+                                    title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                                    content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                            elif photos:
+                                photo_count = len(photos)
+                                if photo_count > 1:
+                                    title = f"Фото {photo_count} шт. от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                                    content = f"Галерея из {photo_count} фотографий, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                                else:
+                                    title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                                    content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
                             else:
-                                title = f"Фото от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
-                                content = f"Фотография, добавленная {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                                # На всякий случай (не должно сюда попасть)
+                                title = f"Пост от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                                content = f"Пост, добавленный {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
                         
                         # Проверяем дубликат
                         if Article.objects.filter(title=title).exists():
@@ -321,7 +343,10 @@ class Command(BaseCommand):
                         if photos:
                             media_info.append(f'📷 {len(photos)} фото')
                         if video:
-                            media_info.append('🎬 видео')
+                            if video_note:
+                                media_info.append('🎥 кружок/story')
+                            else:
+                                media_info.append('🎬 видео')
                         
                         logger.info(f'   📰 Пост #{idx}: {title[:50]}... ({", ".join(media_info) if media_info else "нет контента"})')
                         
