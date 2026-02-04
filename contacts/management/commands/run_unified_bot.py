@@ -387,12 +387,12 @@ class Command(BaseCommand):
         if not sync.should_process_message(message_id, post_date):
             return
         
-        # МЕДИА-ГРУППА: собираем все фото из группы
+        # МЕДИА-ГРУППА: собираем все фото и видео из группы
         if media_group_id:
             # Добавляем в группу
             self.media_groups[media_group_id].append(post)
             
-            # Даём время собрать все фото из группы (ждём 2 секунды)
+            # Даём время собрать все медиа из группы (ждём 2 секунды)
             # Если группа уже обработана - пропускаем
             if media_group_id in self.processed_media_groups:
                 return
@@ -412,31 +412,45 @@ class Command(BaseCommand):
             
             # Собираем все фото
             all_photos = []
+            # Собираем все видео
+            all_videos = []
             for msg in group_messages:
                 if 'photo' in msg:
                     photo = max(msg['photo'], key=lambda x: x.get('file_size', 0))
                     all_photos.append(photo)
+                if 'video' in msg:
+                    all_videos.append({
+                        'video': msg['video'],
+                        'message_id': msg.get('message_id'),
+                        'caption': msg.get('caption', '')
+                    })
                 # Берём текст из первого сообщения с текстом
                 if not text:
                     text = msg.get('text') or msg.get('caption', '')
             
             photos = all_photos
-            logger.info(f'📷 Медиа-группа: {len(photos)} фото')
+            videos = all_videos
+            logger.info(f'📷 Медиа-группа: {len(photos)} фото, {len(videos)} видео')
         
         else:
             # Обычный пост (одно фото или без фото)
             text = post.get('text') or post.get('caption', '')
             photos = []
+            videos = []
             
             if 'photo' in post:
                 photo = max(post['photo'], key=lambda x: x.get('file_size', 0))
                 photos.append(photo)
-        
-        # Проверяем видео
-        video = post.get('video')
+            
+            if 'video' in post:
+                videos.append({
+                    'video': post['video'],
+                    'message_id': message_id,
+                    'caption': post.get('caption', '')
+                })
         
         # Если нет текста И нет фото И нет видео - пропускаем
-        if not text and not photos and not video:
+        if not text and not photos and not videos:
             logger.warning(f'⏭️  Пост #{message_id}: нет текста, фото и видео, пропускаем')
             sync.update_last_message(message_id, post_date, update_id)
             return
@@ -452,7 +466,7 @@ class Command(BaseCommand):
             # Если текста нет, но есть медиа - создаём заголовок из даты + времени
             date_obj = post_date or timezone.now()
             # Добавляем время с секундами чтобы избежать дубликатов
-            if video:
+            if videos:
                 title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}"
                 content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
             else:
@@ -473,7 +487,7 @@ class Command(BaseCommand):
         logger.info(f'   Заголовок: {title[:50]}...')
         logger.info(f'   Текст: {"Да" if text else "Нет"}')
         logger.info(f'   Фото: {len(photos)} шт.')
-        logger.info(f'   Видео: {"Да" if video else "Нет"}')
+        logger.info(f'   Видео: {len(videos)} шт.')
         logger.info('')
         
         try:
@@ -558,38 +572,74 @@ class Command(BaseCommand):
                 if saved_photos > 0:
                     logger.info(f'   ✅ Сохранено фото: {saved_photos}/{len(photos)}')
             
-            # Сохраняем видео
-            if video:
-                try:
-                    file_id = video['file_id']
-                    file_size = video.get('file_size', 0)
-                    size_mb = file_size / (1024 * 1024) if file_size else 0
-                    
-                    # Получаем username канала
-                    channel_username = post.get('chat', {}).get('username', '')
-                    
-                    # ВАРИАНТ 2: Если видео > 20MB - ставим статус pending для скачивания через Telethon
-                    if file_size > 20 * 1024 * 1024:  # 20MB в байтах
-                        article.telegram_channel_username = channel_username
-                        article.telegram_message_id = message_id
-                        article.video_status = 'pending'
-                        article.video_url = None  # Не сохраняем file_id для больших видео
-                        article.save()
-                        
-                        logger.info(f'   ✅ Видео сохранено (большое, ~{size_mb:.1f}MB)')
-                        logger.info(f'      Статус: pending (будет скачано через Telethon worker)')
-                        logger.info(f'      Канал: @{channel_username}, Message ID: {message_id}')
-                    else:
-                        # ВАРИАНТ 2: Видео < 20MB - сохраняем file_id для проксирования
-                        article.video_url = file_id
-                        article.video_status = 'ready'
-                        article.save()
-                        
-                        logger.info(f'   ✅ Видео сохранено (file_id, ~{size_mb:.1f}MB)')
-                        logger.info(f'      Видео будет стримиться через прокси-сервер')
+            # Сохраняем видео (обрабатываем все видео из группы)
+            if videos:
+                saved_videos = 0
+                channel_username = post.get('chat', {}).get('username', '')
                 
-                except Exception as e:
-                    logger.error(f'   ❌ Ошибка сохранения видео: {e}')
+                for video_idx, video_data in enumerate(videos):
+                    try:
+                        video_obj = video_data['video']
+                        video_message_id = video_data['message_id']
+                        video_caption = video_data.get('caption', '')
+                        
+                        file_id = video_obj['file_id']
+                        file_size = video_obj.get('file_size', 0)
+                        size_mb = file_size / (1024 * 1024) if file_size else 0
+                        
+                        # Если видео несколько - создаём отдельную статью для каждого
+                        if len(videos) > 1 and video_idx > 0:
+                            # Создаём отдельную статью для дополнительного видео
+                            video_title = f"{title} (видео {video_idx + 1})"
+                            if video_caption:
+                                video_content = video_caption
+                            else:
+                                video_content = f"Видео {video_idx + 1} из серии"
+                            
+                            # Проверяем дубликат
+                            if Article.objects.filter(title=video_title).exists():
+                                logger.info(f'   ⏭️  Видео {video_idx + 1}: уже существует')
+                                continue
+                            
+                            video_article = Article.objects.create(
+                                title=video_title,
+                                content=video_content,
+                                is_published=auto_publish,
+                                video_status='ready'
+                            )
+                            logger.info(f'   📹 Создана статья для видео {video_idx + 1}: {video_article.slug}')
+                        else:
+                            # Первое видео - используем основную статью
+                            video_article = article
+                        
+                        # ВАРИАНТ 2: Если видео > 20MB - ставим статус pending для скачивания через Telethon
+                        if file_size > 20 * 1024 * 1024:  # 20MB в байтах
+                            video_article.telegram_channel_username = channel_username
+                            video_article.telegram_message_id = video_message_id
+                            video_article.video_status = 'pending'
+                            video_article.video_url = None  # Не сохраняем file_id для больших видео
+                            video_article.save()
+                            
+                            logger.info(f'   ✅ Видео {video_idx + 1} сохранено (большое, ~{size_mb:.1f}MB)')
+                            logger.info(f'      Статус: pending (будет скачано через Telethon worker)')
+                            logger.info(f'      Канал: @{channel_username}, Message ID: {video_message_id}')
+                        else:
+                            # ВАРИАНТ 2: Видео < 20MB - сохраняем file_id для проксирования
+                            video_article.video_url = file_id
+                            video_article.video_status = 'ready'
+                            video_article.save()
+                            
+                            logger.info(f'   ✅ Видео {video_idx + 1} сохранено (file_id, ~{size_mb:.1f}MB)')
+                            logger.info(f'      Видео будет стримиться через прокси-сервер')
+                        
+                        saved_videos += 1
+                    
+                    except Exception as e:
+                        logger.error(f'   ❌ Ошибка сохранения видео {video_idx + 1}: {e}')
+                        logger.exception(e)
+                
+                if saved_videos > 0:
+                    logger.info(f'   ✅ Сохранено видео: {saved_videos}/{len(videos)}')
             
             # Обновляем синхронизацию
             sync.update_last_message(message_id, post_date, update_id)

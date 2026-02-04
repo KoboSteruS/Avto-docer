@@ -42,7 +42,7 @@ python manage.py batch_import_posts --timeout 600
 python manage.py batch_import_posts --batch-size 10
 
 # Всё вместе
-python manage.py batch_import_posts --timeout 600 --batch-size 15 --auto-publish
+python manage.py batch_import_posts --timeout 30 --batch-size 15 --auto-publish
 ```
 
 ### Шаг 3: Пересылай посты
