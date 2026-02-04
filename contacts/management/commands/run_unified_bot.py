@@ -481,7 +481,8 @@ class Command(BaseCommand):
             article = Article.objects.create(
                 title=title,
                 content=content,
-                is_published=auto_publish
+                is_published=auto_publish,
+                video_status='ready'
             )
             
             logger.info(f'✅ Статья создана: {article.slug}')
@@ -581,6 +582,7 @@ class Command(BaseCommand):
                     else:
                         # ВАРИАНТ 2: Видео < 20MB - сохраняем file_id для проксирования
                         article.video_url = file_id
+                        article.video_status = 'ready'
                         article.save()
                         
                         logger.info(f'   ✅ Видео сохранено (file_id, ~{size_mb:.1f}MB)')
