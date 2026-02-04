@@ -479,7 +479,6 @@ class Command(BaseCommand):
                                     except Exception as create_error:
                                         # Если ошибка дубликата slug - пробуем с уникальным суффиксом
                                         if 'UNIQUE constraint' in str(create_error) or 'slug' in str(create_error).lower():
-                                            import time
                                             unique_suffix = int(time.time() * 1000) % 1000000
                                             title_with_suffix = f"{title} ({unique_suffix})"
                                             try:
