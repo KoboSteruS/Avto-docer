@@ -424,6 +424,14 @@ class Command(BaseCommand):
                         'message_id': msg.get('message_id'),
                         'caption': msg.get('caption', '')
                     })
+                # Проверяем video_note (кружки/stories)
+                if 'video_note' in msg:
+                    all_videos.append({
+                        'video': msg['video_note'],  # Используем video_note как video
+                        'message_id': msg.get('message_id'),
+                        'caption': msg.get('caption', ''),
+                        'is_video_note': True  # Помечаем, что это кружок
+                    })
                 # Берём текст из первого сообщения с текстом
                 if not text:
                     text = msg.get('text') or msg.get('caption', '')
@@ -448,6 +456,15 @@ class Command(BaseCommand):
                     'message_id': message_id,
                     'caption': post.get('caption', '')
                 })
+            
+            # Проверяем video_note (кружки/stories)
+            if 'video_note' in post:
+                videos.append({
+                    'video': post['video_note'],  # Используем video_note как video
+                    'message_id': message_id,
+                    'caption': post.get('caption', ''),
+                    'is_video_note': True  # Помечаем, что это кружок
+                })
         
         # Если нет текста И нет фото И нет видео - пропускаем
         if not text and not photos and not videos:
@@ -467,10 +484,16 @@ class Command(BaseCommand):
             date_obj = post_date or timezone.now()
             # Используем message_id для уникальности заголовка
             msg_id_suffix = f" (#{message_id})" if message_id else ""
+            # Проверяем, есть ли video_note (кружки/stories)
+            is_video_note = videos and any(v.get('is_video_note') for v in videos)
             # Добавляем время с секундами и message_id чтобы избежать дубликатов
             if videos:
-                title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
-                content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                if is_video_note:
+                    title = f"Кружок от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                    content = f"Видео-кружок (story), добавленный {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
+                else:
+                    title = f"Видео от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
+                    content = f"Видео, добавленное {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
             elif photos:
                 # Для постов только с фото (кружки/stories)
                 photo_count = len(photos)
@@ -499,7 +522,14 @@ class Command(BaseCommand):
         logger.info(f'   Заголовок: {title[:50]}...')
         logger.info(f'   Текст: {"Да" if text else "Нет"}')
         logger.info(f'   Фото: {len(photos)} шт.')
-        logger.info(f'   Видео: {len(videos)} шт.')
+        if videos:
+            video_note_count = sum(1 for v in videos if v.get('is_video_note'))
+            if video_note_count > 0:
+                logger.info(f'   Видео: {len(videos)} шт. (из них {video_note_count} кружков/stories)')
+            else:
+                logger.info(f'   Видео: {len(videos)} шт.')
+        else:
+            logger.info(f'   Видео: 0 шт.')
         logger.info('')
         
         try:
