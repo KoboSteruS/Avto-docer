@@ -18,13 +18,29 @@ class ArticleImageInline(admin.TabularInline):
     
     def image_preview(self, obj):
         """Превью изображения"""
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="max-width: 150px; max-height: 100px; border-radius: 4px;" />',
-                obj.image.url
-            )
+        if not obj or not obj.pk:
+            return format_html('<span style="color: #999;">Нет изображения</span>')
+        
+        # Проверяем, что статья существует
+        try:
+            if obj.article:
+                if obj.image:
+                    return format_html(
+                        '<img src="{}" style="max-width: 150px; max-height: 100px; border-radius: 4px;" />',
+                        obj.image.url
+                    )
+        except Exception:
+            # Если статья не найдена, показываем ошибку
+            return format_html('<span style="color: #dc2626;">⚠️ Статья не найдена</span>')
+        
         return format_html('<span style="color: #999;">Нет изображения</span>')
     image_preview.short_description = 'Превью'
+    
+    def get_queryset(self, request):
+        """Фильтруем queryset, исключая записи с несуществующими статьями"""
+        qs = super().get_queryset(request)
+        # Исключаем записи, где статья не существует
+        return qs.select_related('article').filter(article__isnull=False)
 
 
 @admin.register(Article)
@@ -111,57 +127,68 @@ class ArticleAdmin(admin.ModelAdmin):
     
     def video_preview(self, obj):
         """Превью видео"""
-        # Большое видео из Telegram
-        if obj.is_large_telegram_video():
-            telegram_url = obj.get_telegram_video_url()
-            return format_html(
-                '<div style="max-width: 400px; padding: 20px; background: #1f2937; border-radius: 8px; border-left: 4px solid #dc2626;">'
-                '<p style="color: #fff; margin: 0 0 10px 0; font-weight: bold;">📹 Большое видео из Telegram</p>'
-                '<p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 12px;">Канал: @{}</p>'
-                '<p style="color: #9ca3af; margin: 0 0 15px 0; font-size: 12px;">Message ID: {}</p>'
-                '<a href="{}" target="_blank" style="display: inline-block; background: #dc2626; color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 14px;">Смотреть в Telegram →</a>'
-                '</div>',
-                obj.telegram_channel_username or 'N/A',
-                obj.telegram_message_id or 'N/A',
-                telegram_url or '#'
-            )
-        elif obj.video_file:
-            # Загруженный файл
-            return format_html(
-                '<div style="max-width: 400px;">'
-                '<video controls width="100%" style="max-height: 225px;">'
-                '<source src="{}" type="video/mp4">'
-                'Ваш браузер не поддерживает видео.'
-                '</video>'
-                '<p style="margin-top: 8px; color: #666; font-size: 12px;">Загруженный файл: {}</p>'
-                '</div>',
-                obj.video_file.url,
-                obj.video_file.name
-            )
-        elif obj.video_url:
-            # URL видео
-            if obj.is_youtube_url() or obj.is_vimeo_url():
-                embed_url = obj.get_video_embed_url()
+        if not obj or not obj.pk:
+            return format_html('<span style="color: #999;">Нет видео</span>')
+        
+        try:
+            # Большое видео из Telegram
+            if obj.is_large_telegram_video():
+                telegram_url = obj.get_telegram_video_url()
                 return format_html(
-                    '<div style="max-width: 400px;">'
-                    '<iframe src="{}" width="100%" height="225" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
-                    '<p style="margin-top: 8px; color: #666; font-size: 12px;">URL: {}</p>'
+                    '<div style="max-width: 400px; padding: 20px; background: #1f2937; border-radius: 8px; border-left: 4px solid #dc2626;">'
+                    '<p style="color: #fff; margin: 0 0 10px 0; font-weight: bold;">📹 Большое видео из Telegram</p>'
+                    '<p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 12px;">Канал: @{}</p>'
+                    '<p style="color: #9ca3af; margin: 0 0 15px 0; font-size: 12px;">Message ID: {}</p>'
+                    '<a href="{}" target="_blank" style="display: inline-block; background: #dc2626; color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 14px;">Смотреть в Telegram →</a>'
                     '</div>',
-                    embed_url,
-                    obj.video_url
+                    obj.telegram_channel_username or 'N/A',
+                    obj.telegram_message_id or 'N/A',
+                    telegram_url or '#'
                 )
-            else:
+            elif obj.video_file:
+                # Загруженный файл
                 return format_html(
                     '<div style="max-width: 400px;">'
                     '<video controls width="100%" style="max-height: 225px;">'
                     '<source src="{}" type="video/mp4">'
                     'Ваш браузер не поддерживает видео.'
                     '</video>'
-                    '<p style="margin-top: 8px; color: #666; font-size: 12px;">URL: {}</p>'
+                    '<p style="margin-top: 8px; color: #666; font-size: 12px;">Загруженный файл: {}</p>'
                     '</div>',
-                    obj.video_url,
-                    obj.video_url
+                    obj.video_file.url,
+                    obj.video_file.name
                 )
+            elif obj.video_url:
+                # URL видео
+                if obj.is_youtube_url() or obj.is_vimeo_url():
+                    embed_url = obj.get_video_embed_url()
+                    return format_html(
+                        '<div style="max-width: 400px;">'
+                        '<iframe src="{}" width="100%" height="225" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>'
+                        '<p style="margin-top: 8px; color: #666; font-size: 12px;">URL: {}</p>'
+                        '</div>',
+                        embed_url,
+                        obj.video_url
+                    )
+                else:
+                    return format_html(
+                        '<div style="max-width: 400px;">'
+                        '<video controls width="100%" style="max-height: 225px;">'
+                        '<source src="{}" type="video/mp4">'
+                        'Ваш браузер не поддерживает видео.'
+                        '</video>'
+                        '<p style="margin-top: 8px; color: #666; font-size: 12px;">URL: {}</p>'
+                        '</div>',
+                        obj.video_url,
+                        obj.video_url
+                    )
+        except Exception as e:
+            # Если ошибка при получении видео, показываем сообщение
+            return format_html(
+                '<span style="color: #dc2626;">⚠️ Ошибка отображения видео: {}</span>',
+                str(e)[:50]
+            )
+        
         return format_html('<span style="color: #999;">Нет видео</span>')
     video_preview.short_description = 'Превью видео'
     

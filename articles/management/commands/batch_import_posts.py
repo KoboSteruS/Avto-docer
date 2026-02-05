@@ -109,6 +109,11 @@ class Command(BaseCommand):
         start_time = time.time()
         last_post_time = time.time()
         
+        # Инициализируем счётчики (нужны для KeyboardInterrupt)
+        created_count = 0
+        skipped_count = 0
+        error_count = 0
+        
         # Этап 1: Сбор постов
         logger.info('📥 ЭТАП 1: СБОР ПОСТОВ')
         logger.info(f'   Жду {timeout} секунд...')
@@ -267,6 +272,7 @@ class Command(BaseCommand):
             logger.info(f'   Размер батча: {batch_size}')
             logger.info('')
             
+            # Сбрасываем счётчики для обработки (уже инициализированы выше)
             created_count = 0
             skipped_count = 0
             error_count = 0
