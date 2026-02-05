@@ -160,6 +160,7 @@ class Command(BaseCommand):
                     allowed_updates = ['message']
                     if news_mode:
                         allowed_updates.append('channel_post')
+                        logger.info(f'📢 Режим новостей активен, канал: {channel_id}')
                     
                     response = requests.get(
                         f'{api_url}/getUpdates',
@@ -181,6 +182,9 @@ class Command(BaseCommand):
                     
                     updates = data.get('result', [])
                     
+                    if updates and news_mode:
+                        logger.debug(f'📥 Получено обновлений: {len(updates)}')
+                    
                     for update in updates:
                         offset = update['update_id'] + 1
                         
@@ -190,6 +194,7 @@ class Command(BaseCommand):
                         
                         # ОБРАБОТКА ПОСТОВ ИЗ КАНАЛА
                         if news_mode and 'channel_post' in update:
+                            logger.info(f'📢 Получен channel_post, обрабатываю...')
                             self._handle_channel_post(
                                 api_url,
                                 update['channel_post'],
@@ -375,13 +380,29 @@ class Command(BaseCommand):
             post_date = timezone.make_aware(datetime.fromtimestamp(post_timestamp))
         
         # Проверяем, что пост из нужного канала
+        channel_username = post.get('chat', {}).get('username', '')
+        channel_title = post.get('chat', {}).get('title', '')
+        
+        # Логируем информацию о канале для диагностики
+        logger.info(f'📢 Получен пост из канала: ID={post_channel_id}, username=@{channel_username}, title={channel_title}')
+        logger.info(f'📢 Ожидаемый канал: {channel_id}')
+        
         if channel_id.startswith('@'):
-            channel_username = post.get('chat', {}).get('username', '')
+            # Проверка по username
             if f'@{channel_username}' != channel_id:
+                logger.info(f'⏭️  Пропущен пост: username не совпадает (@{channel_username} != {channel_id})')
                 return
         else:
-            if str(post_channel_id) != str(channel_id).replace('@', ''):
+            # Проверка по ID (может быть строка или число, с минусом или без)
+            channel_id_clean = str(channel_id).replace('@', '').strip()
+            post_channel_id_clean = str(post_channel_id).strip()
+            
+            # Сравниваем как строки (ID канала может быть отрицательным, например -1001174797683)
+            if post_channel_id_clean != channel_id_clean:
+                logger.info(f'⏭️  Пропущен пост: ID не совпадает (получен: {post_channel_id_clean}, ожидается: {channel_id_clean})')
                 return
+        
+        logger.info(f'✅ Пост из нужного канала: {channel_title or channel_username or post_channel_id}')
         
         # Проверяем, обрабатывали ли уже этот пост
         if not sync.should_process_message(message_id, post_date):

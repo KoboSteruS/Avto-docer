@@ -51,6 +51,11 @@ class Command(BaseCommand):
             default=20,
             help='Размер батча для обработки (по умолчанию 20)',
         )
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Принудительный импорт, даже если статья уже существует (удалит старую и создаст новую)',
+        )
     
     def handle(self, *args, **options):
         """Основной метод команды"""
@@ -59,6 +64,7 @@ class Command(BaseCommand):
         timeout = options['timeout']
         auto_publish = options['auto_publish']
         batch_size = options['batch_size']
+        force = options.get('force', False)
         
         logger.info('=' * 80)
         logger.info('📦 БАТЧ-ИМПОРТ ПОСТОВ ИЗ TELEGRAM')
@@ -66,6 +72,8 @@ class Command(BaseCommand):
         logger.info(f'⏱️  Таймаут: {timeout} сек ({timeout//60} мин)')
         logger.info(f'📊 Размер батча: {batch_size} постов')
         logger.info(f'📝 Публикация: {"Сразу" if auto_publish else "Черновики"}')
+        if force:
+            logger.info('🔄 Режим: ПРИНУДИТЕЛЬНЫЙ (существующие статьи будут удалены и пересозданы)')
         logger.info('=' * 80)
         
         # Проверяем бота
@@ -370,11 +378,33 @@ class Command(BaseCommand):
                                 title = f"Пост от {date_obj.strftime('%d.%m.%Y %H:%M:%S')}{msg_id_suffix}"
                                 content = f"Пост, добавленный {date_obj.strftime('%d.%m.%Y в %H:%M:%S')}"
                         
-                        # Проверяем дубликат
-                        if Article.objects.filter(title=title).exists():
-                            logger.info(f'   ⏭️  Пост #{idx}: "{title[:40]}..." уже существует')
-                            skipped_count += 1
-                            continue
+                        # Проверяем дубликат по telegram_message_id (более надежно, чем по title)
+                        message_id = message.get('forward_from_message_id') or message.get('message_id')
+                        channel_username = message.get('forward_from_chat', {}).get('username', '')
+                        
+                        # Проверяем по message_id и каналу (если есть)
+                        duplicate_query = Article.objects.all()
+                        if message_id:
+                            duplicate_query = duplicate_query.filter(telegram_message_id=message_id)
+                        if channel_username:
+                            duplicate_query = duplicate_query.filter(telegram_channel_username=channel_username)
+                        
+                        # Если не нашли по message_id, проверяем по title (для старых постов без message_id)
+                        if not duplicate_query.exists():
+                            duplicate_query = Article.objects.filter(title=title)
+                        
+                        if duplicate_query.exists():
+                            existing_article = duplicate_query.first()
+                            status_info = f"опубликована" if existing_article.is_published else "не опубликована"
+                            
+                            if force:
+                                # Принудительный импорт - удаляем старую статью
+                                logger.info(f'   🔄 Пост #{idx}: "{title[:40]}..." уже существует (ID: {existing_article.id}, {status_info}), удаляю и пересоздаю...')
+                                existing_article.delete()
+                            else:
+                                logger.info(f'   ⏭️  Пост #{idx}: "{title[:40]}..." уже существует (ID: {existing_article.id}, {status_info})')
+                                skipped_count += 1
+                                continue
                         
                         # Логируем с информацией о содержимом
                         media_info = []
@@ -536,7 +566,8 @@ class Command(BaseCommand):
                                 article = Article.objects.create(
                                     title=title,
                                     content=content,
-                                    is_published=auto_publish
+                                    is_published=auto_publish,
+                                    video_status='ready'
                                 )
                             except Exception as create_error:
                                 # Если ошибка дубликата slug - пробуем с уникальным суффиксом
@@ -547,7 +578,8 @@ class Command(BaseCommand):
                                         article = Article.objects.create(
                                             title=title_with_suffix,
                                             content=content,
-                                            is_published=auto_publish
+                                            is_published=auto_publish,
+                                            video_status='ready'
                                         )
                                         logger.warning(f'      ⚠️  Slug дубликат, создано с суффиксом: {article.slug}')
                                     except Exception as e2:
@@ -555,6 +587,12 @@ class Command(BaseCommand):
                                         raise
                                 else:
                                     raise
+                            
+                            # Сохраняем telegram_message_id и channel_username для отслеживания
+                            if message_id and channel_username:
+                                article.telegram_message_id = message_id
+                                article.telegram_channel_username = channel_username
+                                article.save(update_fields=['telegram_message_id', 'telegram_channel_username'])
                         
                         # Сохраняем фото (только если статья создана)
                         if not article:
