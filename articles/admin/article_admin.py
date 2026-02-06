@@ -50,10 +50,12 @@ class ArticleAdmin(admin.ModelAdmin):
     Удобный интерфейс с превью изображений и видео.
     """
     inlines = [ArticleImageInline]
-    list_display = ['title', 'slug', 'image_preview', 'video_preview', 'is_published', 'views', 'created_at']
+    list_display = ['display_order', 'title', 'slug', 'image_preview', 'video_preview', 'is_published', 'views', 'created_at']
     list_filter = ['is_published', 'created_at', 'updated_at']
     search_fields = ['title', 'slug', 'content']
-    list_editable = ['is_published']
+    list_editable = ['display_order', 'is_published']
+    list_display_links = ['title']
+    ordering = ['display_order', '-created_at']
     readonly_fields = ['id', 'views', 'created_at', 'updated_at', 'image_preview', 'video_preview']
     
     def get_form(self, request, obj=None, **kwargs):
@@ -72,7 +74,8 @@ class ArticleAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('title', 'slug', 'is_published')
+            'fields': ('title', 'slug', 'display_order', 'is_published'),
+            'description': 'Порядок отображения: чем меньше число, тем выше статья в списке на сайте. Можно менять прямо в списке статей.'
         }),
         ('Содержимое', {
             'fields': ('content',),
@@ -192,7 +195,16 @@ class ArticleAdmin(admin.ModelAdmin):
         return format_html('<span style="color: #999;">Нет видео</span>')
     video_preview.short_description = 'Превью видео'
     
-    actions = ['publish_articles', 'unpublish_articles']
+    actions = ['publish_articles', 'unpublish_articles', 'order_by_date']
+    
+    def order_by_date(self, request, queryset):
+        """Упорядочить выбранные статьи по дате (новые первые: 0, 1, 2, ...)"""
+        articles = list(queryset.order_by('-created_at'))
+        for i, article in enumerate(articles):
+            article.display_order = i
+            article.save(update_fields=['display_order'])
+        self.message_user(request, f'Порядок обновлён для {len(articles)} статей (по дате, новые первые).')
+    order_by_date.short_description = 'Упорядочить по дате (новые первые)'
     
     def publish_articles(self, request, queryset):
         """Массовая публикация статей"""

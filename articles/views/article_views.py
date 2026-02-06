@@ -17,7 +17,7 @@ class ArticleListView(ListView):
     
     def get_queryset(self):
         """Получить только опубликованные статьи"""
-        return Article.objects.filter(is_published=True).order_by('-created_at')
+        return Article.objects.filter(is_published=True).order_by('display_order', '-created_at')
 
 
 class ArticleDetailView(DetailView):
@@ -47,6 +47,6 @@ class ArticleDetailView(DetailView):
             is_published=True
         ).exclude(
             id=article.id
-        ).order_by('-created_at')[:6]
+        ).order_by('display_order', '-created_at')[:6]
         
         return context

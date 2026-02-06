@@ -86,6 +86,11 @@ class Article(BaseModel):
         verbose_name='Опубликовано',
         help_text='Статья будет видна только после публикации'
     )
+    display_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Порядок отображения',
+        help_text='Чем меньше число, тем выше статья в списке. Редактируйте в списке статей или здесь.'
+    )
     views = models.PositiveIntegerField(
         default=0,
         verbose_name='Просмотры',
@@ -95,9 +100,9 @@ class Article(BaseModel):
     class Meta:
         verbose_name = 'Статья'
         verbose_name_plural = 'Статьи'
-        ordering = ['-created_at']
+        ordering = ['display_order', '-created_at']
         indexes = [
-            models.Index(fields=['is_published', '-created_at']),
+            models.Index(fields=['is_published', 'display_order', '-created_at']),
             models.Index(fields=['slug']),
         ]
 
