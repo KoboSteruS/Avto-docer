@@ -186,23 +186,27 @@ class Command(BaseCommand):
                         logger.debug(f'📥 Получено обновлений: {len(updates)}')
                     
                     for update in updates:
-                        offset = update['update_id'] + 1
-                        
-                        # ОБРАБОТКА СООБЩЕНИЙ ОТ ПОЛЬЗОВАТЕЛЕЙ
-                        if 'message' in update:
-                            self._handle_user_message(api_url, update['message'])
-                        
-                        # ОБРАБОТКА ПОСТОВ ИЗ КАНАЛА
-                        if news_mode and 'channel_post' in update:
-                            logger.info(f'📢 Получен channel_post, обрабатываю...')
-                            self._handle_channel_post(
-                                api_url,
-                                update['channel_post'],
-                                channel_id,
-                                auto_publish,
-                                sync,
-                                update['update_id']
-                            )
+                        try:
+                            # ОБРАБОТКА СООБЩЕНИЙ ОТ ПОЛЬЗОВАТЕЛЕЙ
+                            if 'message' in update:
+                                self._handle_user_message(api_url, update['message'])
+                            
+                            # ОБРАБОТКА ПОСТОВ ИЗ КАНАЛА
+                            if news_mode and 'channel_post' in update:
+                                logger.info(f'📢 Получен channel_post, обрабатываю...')
+                                self._handle_channel_post(
+                                    api_url,
+                                    update['channel_post'],
+                                    channel_id,
+                                    auto_publish,
+                                    sync,
+                                    update['update_id']
+                                )
+                        except Exception as e:
+                            logger.error(f'Ошибка при обработке update {update.get("update_id")}: {e}')
+                            logger.exception(e)
+                        finally:
+                            offset = update['update_id'] + 1
                     
                     # Задержка если нет обновлений
                     if not updates:
@@ -559,6 +563,7 @@ class Command(BaseCommand):
                 title=title,
                 content=content,
                 is_published=auto_publish,
+                display_order=0,
                 video_status='ready'
             )
             
@@ -668,6 +673,7 @@ class Command(BaseCommand):
                                 title=video_title,
                                 content=video_content,
                                 is_published=auto_publish,
+                                display_order=0,
                                 video_status='ready'
                             )
                             logger.info(f'   📹 Создана статья для видео {video_idx + 1}: {video_article.slug}')

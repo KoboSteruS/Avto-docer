@@ -238,6 +238,39 @@ journalctl -u avto-decor -f
 
 ---
 
+## 9.1. Сервис сбора новостей из Telegram (постоянно запущен)
+
+Чтобы **все новые посты** из канала попадали на сайт, бот должен работать постоянно (long polling). Если запускать его вручную или по таймеру, часть постов можно пропустить.
+
+**Создайте unit и включите сервис:**
+
+```bash
+# Скопировать unit из проекта в systemd
+cp /root/Avto-docer/avto-decor-news-bot.service /etc/systemd/system/
+
+# Или создать вручную: nano /etc/systemd/system/avto-decor-news-bot.service
+# Содержимое — см. файл avto-decor-news-bot.service в репозитории
+
+# В .env должен быть TELEGRAM_BOT_TOKEN (токен бота, который добавлен в админы канала)
+# В unit канал задаётся по ID (число вида -1001174797683). Свой ID — подставьте в ExecStart (--channel -100xxxxxxxxxx).
+# Узнать ID: переслать пост из канала боту @userinfobot или посмотреть в логах при первом посте (там будет «ID=...»).
+
+systemctl daemon-reload
+systemctl enable avto-decor-news-bot
+systemctl start avto-decor-news-bot
+systemctl status avto-decor-news-bot
+```
+
+**Просмотр логов бота:**
+
+```bash
+journalctl -u avto-decor-news-bot -f
+```
+
+**Важно:** сервис должен быть включён (`enable`) и запущен (`start`), тогда бот всегда висит на getUpdates и обрабатывает каждый новый пост из канала. После обработки одного поста он не перестаёт смотреть — цикл продолжается и ловит следующие.
+
+---
+
 ## 10. Настройка Nginx
 
 **Создайте файл:** `/etc/nginx/sites-available/avto-decor`
@@ -344,6 +377,9 @@ tail -f /var/log/nginx/error.log
 # Перезапуск Gunicorn
 systemctl restart avto-decor
 
+# Перезапуск бота сбора новостей
+systemctl restart avto-decor-news-bot
+
 # Перезапуск Nginx
 systemctl restart nginx
 
@@ -362,6 +398,7 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
 systemctl restart avto-decor
+systemctl restart avto-decor-news-bot
 ```
 
 ---
@@ -395,7 +432,7 @@ systemctl restart avto-decor
 
 ```
 /root/Avto-docer/
-├── .env                    # Переменные окружения
+├── .env                    # Переменные окружения (TELEGRAM_BOT_TOKEN и др.)
 ├── db.sqlite3              # База данных
 ├── media/                  # Медиа файлы
 ├── staticfiles/            # Собранные статические файлы
@@ -405,6 +442,8 @@ systemctl restart avto-decor
 │   └── error.log
 └── venv/                   # Виртуальное окружение
 ```
+
+**Systemd-сервисы:** `avto-decor` (Gunicorn), `avto-decor-news-bot` (сбор новостей из Telegram), при необходимости `telethon-video-worker` (скачивание больших видео).
 
 ---
 
